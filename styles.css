@@ -1003,6 +1003,13 @@ select {
   margin-bottom: 14px;
 }
 
+.proposal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .proposal-box {
   background:
     radial-gradient(700px 240px at 100% -10%, rgba(13, 110, 102, 0.06), transparent 60%),

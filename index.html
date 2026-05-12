@@ -320,13 +320,21 @@
                   <p class="card-label">Proposal-ready</p>
                   <h4>Summary you can paste</h4>
                 </div>
-                <button id="copyProposal" class="ghost-button" type="button">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <rect x="8" y="8" width="12" height="12" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
-                    <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                  </svg>
-                  Copy text
-                </button>
+                <div class="proposal-actions">
+                  <button id="copyProposal" class="ghost-button" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect x="8" y="8" width="12" height="12" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                      <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    Copy text
+                  </button>
+                  <button id="downloadProposal" class="ghost-button" type="button" title="Download proposal as Markdown">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Download .md
+                  </button>
+                </div>
               </div>
               <pre id="proposalText"></pre>
             </article>

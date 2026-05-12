@@ -182,6 +182,52 @@ function buildUpsells(input) {
   return upsells;
 }
 
+function buildMarkdownProposal(input, prices, riskScore) {
+  const deliverableList = input.deliverables.length
+    ? input.deliverables.map((item) => `- ${titleize(item)}`).join("\n")
+    : "- (none specified)";
+  const rushLine =
+    input.timeline === "rush"
+      ? "A rush delivery premium is included to protect focus and availability."
+      : "The proposed timeline assumes standard turnaround and consolidated feedback.";
+  const heading = input.projectName
+    ? `# Proposal — ${input.projectName}`
+    : `# Proposal — ${titleize(input.projectType)} Engagement`;
+  const clientLine = input.clientName ? `**Prepared for:** ${input.clientName}` : "";
+
+  return [
+    heading,
+    clientLine,
+    "",
+    `**Engagement type:** ${titleize(input.projectType)}  `,
+    `**Recommended investment:** ${currency.format(prices.recommended)}  `,
+    `**Floor / Stretch:** ${currency.format(prices.floor)} / ${currency.format(prices.stretch)}  `,
+    `**Payment schedule:** ${prices.paymentPlan}  `,
+    "",
+    "## Scope",
+    `- Estimated effort: ${input.hours} hours at ${currency.format(input.rate)}/hr`,
+    `- Revision rounds included: ${input.revisions}`,
+    `- Stakeholder profile: ${input.stakeholders}`,
+    "",
+    "### Included deliverables",
+    deliverableList,
+    "",
+    "## Commercial terms",
+    `- ${rushLine}`,
+    "- Any work outside the approved deliverables will be quoted as a change request.",
+    "- Delays caused by missing client feedback may shift delivery dates.",
+    "",
+    "## Risk notes",
+    `- Pricing risk score: **${riskScore}/10**`,
+    `- Budget clarity: ${input.budgetConfidence}`,
+    `- Source notes: ${input.notes.trim() || "No additional client notes provided."}`,
+    "",
+    `_Generated with ScopeMint on ${new Date().toLocaleDateString()}_`,
+  ]
+    .filter((line) => line !== null && line !== undefined)
+    .join("\n");
+}
+
 function buildProposal(input, prices, riskScore) {
   const deliverableList = input.deliverables.map(titleize).join(", ");
   const rushLine =
@@ -558,6 +604,30 @@ copyProposalButton.addEventListener("click", async () => {
     }, 1200);
   }
 });
+
+const downloadProposalButton = document.querySelector("#downloadProposal");
+if (downloadProposalButton) {
+  downloadProposalButton.addEventListener("click", () => {
+    const input = readForm();
+    const prices = computeQuote(input);
+    const markdown = buildMarkdownProposal(input, prices, prices.riskScore);
+    const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const slugSource = input.projectName || input.clientName || `${input.projectType}-quote`;
+    const slug = slugSource
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || "scopemint-proposal";
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${slug}.md`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  });
+}
 
 for (const button of billingButtons) {
   button.addEventListener("click", () => {
