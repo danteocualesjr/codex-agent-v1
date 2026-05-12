@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScopeMint | Price Projects Without Undercharging</title>
+    <meta
+      name="description"
+      content="ScopeMint helps freelancers and agencies turn messy project requests into smart pricing, tighter scope, and proposal-ready copy."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <div class="brand-mark">S</div>
+          <div>
+            <p class="eyebrow">Monetizable Micro-SaaS</p>
+            <h1>ScopeMint</h1>
+          </div>
+        </div>
+        <a class="ghost-button" href="#pricing">Pricing</a>
+      </header>
+
+      <main>
+        <section class="hero panel">
+          <div class="hero-copy">
+            <p class="eyebrow">Stop underpricing good work</p>
+            <h2>Turn fuzzy client requests into confident project quotes.</h2>
+            <p class="hero-text">
+              ScopeMint gives freelancers and small agencies an instant price
+              recommendation, risk flags, payment schedule, and proposal-ready
+              scope language.
+            </p>
+            <div class="hero-points">
+              <span>Pricing logic that feels senior</span>
+              <span>Proposal copy you can paste today</span>
+              <span>Built for service businesses that already spend money</span>
+            </div>
+          </div>
+          <div class="hero-card">
+            <p class="card-label">Why this can earn</p>
+            <ul>
+              <li>Clear buyer: freelancers, studios, agencies</li>
+              <li>Strong pain: undercharging kills margin fast</li>
+              <li>Easy upsell path: templates, CRM, Stripe, AI polish</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="workspace">
+          <form class="panel form-panel" id="scope-form">
+            <div class="section-heading">
+              <p class="eyebrow">Input</p>
+              <h3>Project details</h3>
+            </div>
+
+            <div class="grid two-up">
+              <label>
+                <span>Project type</span>
+                <select id="projectType">
+                  <option value="brand">Brand Identity</option>
+                  <option value="web">Marketing Website</option>
+                  <option value="app">MVP App Build</option>
+                  <option value="retainer">Monthly Retainer</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Client budget confidence</span>
+                <select id="budgetConfidence">
+                  <option value="low">Budget unclear</option>
+                  <option value="medium">Some range shared</option>
+                  <option value="high">Budget is defined</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="grid two-up">
+              <label>
+                <span>Estimated hours</span>
+                <input id="hours" type="number" min="1" value="40" />
+              </label>
+
+              <label>
+                <span>Your target hourly rate (USD)</span>
+                <input id="rate" type="number" min="25" value="90" />
+              </label>
+            </div>
+
+            <div class="grid three-up">
+              <label>
+                <span>Timeline pressure</span>
+                <select id="timeline">
+                  <option value="calm">Calm</option>
+                  <option value="normal" selected>Normal</option>
+                  <option value="rush">Rush</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Revision rounds</span>
+                <select id="revisions">
+                  <option value="1">1 round</option>
+                  <option value="2" selected>2 rounds</option>
+                  <option value="3">3 rounds</option>
+                  <option value="4">4+ rounds</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Stakeholder complexity</span>
+                <select id="stakeholders">
+                  <option value="solo">1 decision-maker</option>
+                  <option value="small" selected>2-3 stakeholders</option>
+                  <option value="large">4+ stakeholders</option>
+                </select>
+              </label>
+            </div>
+
+            <fieldset class="checkbox-fieldset">
+              <legend>Deliverables</legend>
+              <label><input type="checkbox" value="strategy" checked /> Strategy</label>
+              <label><input type="checkbox" value="design" checked /> Design</label>
+              <label><input type="checkbox" value="copy" /> Copy</label>
+              <label><input type="checkbox" value="dev" /> Development</label>
+              <label><input type="checkbox" value="analytics" /> Analytics</label>
+              <label><input type="checkbox" value="handoff" checked /> Handoff</label>
+            </fieldset>
+
+            <label>
+              <span>Client notes</span>
+              <textarea
+                id="notes"
+                rows="5"
+                placeholder="Paste the messy client brief, goals, or red flags here."
+              ></textarea>
+            </label>
+
+            <button class="primary-button" type="submit">Generate quote</button>
+          </form>
+
+          <section class="panel output-panel" aria-live="polite">
+            <div class="section-heading">
+              <p class="eyebrow">Output</p>
+              <h3>Recommended pricing</h3>
+            </div>
+
+            <div class="price-strip">
+              <div>
+                <span>Floor</span>
+                <strong id="floorPrice">$0</strong>
+              </div>
+              <div class="featured-price">
+                <span>Recommended</span>
+                <strong id="recommendedPrice">$0</strong>
+              </div>
+              <div>
+                <span>Stretch</span>
+                <strong id="stretchPrice">$0</strong>
+              </div>
+            </div>
+
+            <div class="grid two-up metrics">
+              <article>
+                <span class="metric-label">Risk score</span>
+                <strong id="riskScore">0/10</strong>
+                <p id="riskSummary"></p>
+              </article>
+              <article>
+                <span class="metric-label">Payment structure</span>
+                <strong id="paymentPlan">50 / 30 / 20</strong>
+                <p id="paymentSummary"></p>
+              </article>
+            </div>
+
+            <div class="grid two-up callouts">
+              <article>
+                <h4>Scope guardrails</h4>
+                <ul id="guardrails"></ul>
+              </article>
+              <article>
+                <h4>Upsell ideas</h4>
+                <ul id="upsells"></ul>
+              </article>
+            </div>
+
+            <article class="proposal-box">
+              <div class="proposal-head">
+                <h4>Proposal-ready summary</h4>
+                <button id="copyProposal" class="ghost-button" type="button">
+                  Copy text
+                </button>
+              </div>
+              <pre id="proposalText"></pre>
+            </article>
+          </section>
+        </section>
+
+        <section class="panel monetization-panel" id="pricing">
+          <div class="pricing-header">
+            <div class="section-heading">
+              <p class="eyebrow">Monetization</p>
+              <h3>Simple pricing that fits the market</h3>
+            </div>
+
+            <div class="billing-toggle" role="group" aria-label="Billing frequency">
+              <button class="toggle-pill is-active" type="button" data-billing="monthly">
+                Monthly
+              </button>
+              <button class="toggle-pill" type="button" data-billing="yearly">
+                Yearly
+                <span>Save 20%</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="pricing-grid" id="pricingGrid">
+            <article class="price-card" data-plan="starter">
+              <p class="tier">Starter</p>
+              <h4>
+                <span class="price-value" data-price="starter">$19</span><span class="price-suffix">/month</span>
+              </h4>
+              <p>For solo freelancers pricing a few projects per month.</p>
+              <ul>
+                <li>Unlimited quote generation</li>
+                <li>Proposal summary export</li>
+                <li>Basic pricing presets</li>
+              </ul>
+              <button class="primary-button plan-button" type="button" data-plan-select="starter">
+                Choose Starter
+              </button>
+            </article>
+
+            <article class="price-card featured" data-plan="pro">
+              <p class="tier">Pro</p>
+              <h4>
+                <span class="price-value" data-price="pro">$49</span><span class="price-suffix">/month</span>
+              </h4>
+              <p>For consultants and studios who want better margins.</p>
+              <ul>
+                <li>Custom rate cards</li>
+                <li>Team pricing presets</li>
+                <li>Scope risk insights</li>
+              </ul>
+              <button class="primary-button plan-button" type="button" data-plan-select="pro">
+                Choose Pro
+              </button>
+            </article>
+
+            <article class="price-card" data-plan="agency">
+              <p class="tier">Agency</p>
+              <h4>
+                <span class="price-value" data-price="agency">$149</span><span class="price-suffix">/month</span>
+              </h4>
+              <p>For agencies standardizing quoting across the team.</p>
+              <ul>
+                <li>Shared templates</li>
+                <li>White-label exports</li>
+                <li>Client-facing quote links</li>
+              </ul>
+              <button class="primary-button plan-button" type="button" data-plan-select="agency">
+                Choose Agency
+              </button>
+            </article>
+          </div>
+
+          <section class="checkout-panel">
+            <div>
+              <p class="eyebrow">Checkout</p>
+              <h4 id="selectedPlanLabel">Pro plan selected</h4>
+              <p id="planRecommendation" class="checkout-copy">
+                Based on the current quote, Pro gives you the best balance of margin protection and workflow depth.
+              </p>
+            </div>
+
+            <div class="checkout-summary">
+              <div>
+                <span>Billing</span>
+                <strong id="selectedBilling">Monthly</strong>
+              </div>
+              <div>
+                <span>Price</span>
+                <strong id="selectedPrice">$49/month</strong>
+              </div>
+              <div>
+                <span>You save</span>
+                <strong id="selectedSavings">-</strong>
+              </div>
+            </div>
+
+            <div class="checkout-form">
+              <label>
+                <span>Work email</span>
+                <input
+                  id="checkoutEmail"
+                  type="email"
+                  placeholder="you@studio.com"
+                  autocomplete="email"
+                />
+              </label>
+
+              <label>
+                <span>Team size</span>
+                <select id="teamSize">
+                  <option value="solo">Just me</option>
+                  <option value="small">2-5 people</option>
+                  <option value="agency">6+ people</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="checkout-actions">
+              <button class="primary-button" id="checkoutButton" type="button">
+                Start free trial
+              </button>
+              <button class="ghost-button" id="copyCheckoutLink" type="button">
+                Copy checkout link
+              </button>
+            </div>
+
+            <p id="checkoutMessage" class="checkout-message">
+              Select a plan to generate a shareable checkout link.
+            </p>
+          </section>
+
+          <div class="launch-note">
+            <p>
+              Fastest go-to-market: sell this first as a polished no-code-style
+              quoting assistant to freelancers on X, LinkedIn, indie hacker
+              communities, and design/dev agency circles.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
