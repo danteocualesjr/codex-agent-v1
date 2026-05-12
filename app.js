@@ -734,6 +734,84 @@ if (printProposalButton) {
   });
 }
 
+function encodeQuoteToHash(input) {
+  try {
+    const json = JSON.stringify(input);
+    const utf8 = new TextEncoder().encode(json);
+    let binary = "";
+    utf8.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  } catch {
+    return "";
+  }
+}
+
+function decodeQuoteFromHash(hash) {
+  if (!hash) return null;
+  try {
+    let normalized = hash.replace(/-/g, "+").replace(/_/g, "/");
+    while (normalized.length % 4) normalized += "=";
+    const binary = atob(normalized);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return null;
+  }
+}
+
+function buildShareUrl(input) {
+  const url = new URL(window.location.href);
+  url.hash = `q=${encodeQuoteToHash(input)}`;
+  return url.toString();
+}
+
+const shareQuoteButton = document.querySelector("#shareQuote");
+if (shareQuoteButton) {
+  shareQuoteButton.addEventListener("click", async () => {
+    const input = readForm();
+    const shareUrl = buildShareUrl(input);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      showToast({
+        type: "success",
+        title: "Share link copied",
+        message: "Anyone who opens it sees this quote pre-filled.",
+      });
+    } catch {
+      window.prompt("Copy this shareable quote URL:", shareUrl);
+      showToast({
+        type: "info",
+        title: "Share URL ready",
+        message: "Copy it from the prompt to share.",
+      });
+    }
+  });
+}
+
+function applyHashStateIfPresent() {
+  const hash = window.location.hash || "";
+  const match = hash.match(/q=([^&]+)/);
+  if (!match) return false;
+  const decoded = decodeQuoteFromHash(decodeURIComponent(match[1]));
+  if (!decoded || typeof decoded !== "object") return false;
+  const merged = { ...defaultFormState, ...decoded };
+  if (!Array.isArray(merged.deliverables)) merged.deliverables = [];
+  writeForm(merged);
+  activeCurrency = merged.currency || "USD";
+  currency = buildCurrencyFormatter(activeCurrency);
+  persistState(merged);
+  updateOutput(readForm());
+  showToast({
+    type: "info",
+    title: "Shared quote loaded",
+    message: "Imported from the link you opened.",
+  });
+  return true;
+}
+
 for (const button of billingButtons) {
   button.addEventListener("click", () => {
     setBilling(button.dataset.billing);
@@ -782,6 +860,12 @@ if (savedPricingState.teamSize) {
 setBilling(savedPricingState.billing || "monthly");
 setPlan(savedPricingState.plan || "pro");
 updateOutput(readForm());
+
+applyHashStateIfPresent();
+
+window.addEventListener("hashchange", () => {
+  applyHashStateIfPresent();
+});
 
 if (footerYear) {
   footerYear.textContent = new Date().getFullYear();
