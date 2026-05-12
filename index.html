@@ -234,12 +234,20 @@
               ></textarea>
             </label>
 
-            <button class="primary-button submit-button" type="submit">
-              Generate quote
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
+            <div class="form-actions">
+              <button class="primary-button submit-button" type="submit">
+                Generate quote
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <button class="ghost-button reset-button" id="resetForm" type="button" title="Clear all inputs">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Reset
+              </button>
+            </div>
           </form>
 
           <section class="panel output-panel" aria-live="polite">

@@ -500,12 +500,40 @@ function handleCheckout() {
   persistPricingState({ billing, plan, email, teamSize: teamSize.value });
 }
 
+const defaultFormState = {
+  clientName: "",
+  projectName: "",
+  projectType: "brand",
+  budgetConfidence: "low",
+  hours: 40,
+  rate: 90,
+  currency: "USD",
+  timeline: "normal",
+  revisions: "2",
+  stakeholders: "small",
+  deliverables: ["strategy", "design", "handoff"],
+  notes: "",
+};
+
 scopeForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const input = readForm();
   persistState(input);
   updateOutput(input);
 });
+
+const resetButton = document.querySelector("#resetForm");
+if (resetButton) {
+  resetButton.addEventListener("click", () => {
+    writeForm(defaultFormState);
+    localStorage.removeItem(storageKey);
+    activeCurrency = defaultFormState.currency;
+    currency = buildCurrencyFormatter(activeCurrency);
+    updateOutput(readForm());
+    resetButton.classList.add("is-flash");
+    window.setTimeout(() => resetButton.classList.remove("is-flash"), 600);
+  });
+}
 
 const currencySelect = document.querySelector("#currency");
 if (currencySelect) {
