@@ -791,6 +791,174 @@ if (shareQuoteButton) {
   });
 }
 
+const historyStorageKey = "scopemint-history";
+const historyListEl = document.querySelector("#historyList");
+const historyEmptyEl = document.querySelector("#historyEmpty");
+const historyCountEl = document.querySelector("#historyCount");
+const saveQuoteButton = document.querySelector("#saveQuote");
+const clearHistoryButton = document.querySelector("#clearHistory");
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(historyStorageKey);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(entries) {
+  localStorage.setItem(historyStorageKey, JSON.stringify(entries.slice(0, 25)));
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function summarizeEntry(entry) {
+  const projectLabel = entry.input.projectName
+    || `${titleize(entry.input.projectType)} engagement`;
+  const clientLabel = entry.input.clientName || "Untitled client";
+  const formatter = buildCurrencyFormatter(entry.input.currency || "USD");
+  return {
+    title: `${clientLabel} · ${projectLabel}`,
+    price: formatter.format(entry.prices.recommended),
+    risk: `Risk ${entry.prices.riskScore}/10`,
+    saved: new Date(entry.savedAt).toLocaleString(),
+  };
+}
+
+function renderHistory() {
+  if (!historyListEl) return;
+  const entries = loadHistory();
+  historyListEl.innerHTML = "";
+
+  if (historyCountEl) {
+    historyCountEl.textContent = `${entries.length} saved`;
+  }
+
+  if (entries.length === 0) {
+    historyListEl.classList.add("is-hidden");
+    historyEmptyEl?.classList.remove("is-hidden");
+    clearHistoryButton?.classList.add("is-hidden");
+    return;
+  }
+
+  historyListEl.classList.remove("is-hidden");
+  historyEmptyEl?.classList.add("is-hidden");
+  clearHistoryButton?.classList.remove("is-hidden");
+
+  for (const entry of entries) {
+    const summary = summarizeEntry(entry);
+    const li = document.createElement("li");
+    li.className = "history-item";
+    li.dataset.id = entry.id;
+    li.innerHTML = `
+      <div class="history-info">
+        <p class="history-title">${escapeHtml(summary.title)}</p>
+        <div class="history-meta-row">
+          <span class="history-price">${escapeHtml(summary.price)}</span>
+          <span>${escapeHtml(summary.risk)}</span>
+          <span>${escapeHtml(summary.saved)}</span>
+        </div>
+      </div>
+      <div class="history-actions">
+        <button class="icon-button" data-action="restore" type="button" title="Restore quote" aria-label="Restore quote">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-button is-danger" data-action="delete" type="button" title="Delete from history" aria-label="Delete from history">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    `;
+    historyListEl.appendChild(li);
+  }
+}
+
+function restoreHistoryEntry(id) {
+  const entries = loadHistory();
+  const entry = entries.find((item) => item.id === id);
+  if (!entry) return;
+  const merged = { ...defaultFormState, ...entry.input };
+  if (!Array.isArray(merged.deliverables)) merged.deliverables = [];
+  writeForm(merged);
+  activeCurrency = merged.currency || "USD";
+  currency = buildCurrencyFormatter(activeCurrency);
+  persistState(merged);
+  updateOutput(readForm());
+  document.querySelector("#quote")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  showToast({
+    type: "success",
+    title: "Quote restored",
+    message: `${entry.input.clientName || "Quote"} loaded into the form.`,
+  });
+}
+
+function deleteHistoryEntry(id) {
+  const entries = loadHistory().filter((item) => item.id !== id);
+  saveHistory(entries);
+  renderHistory();
+  showToast({
+    type: "info",
+    title: "Quote removed",
+    message: "Removed from your saved history.",
+  });
+}
+
+if (historyListEl) {
+  historyListEl.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+    const item = button.closest(".history-item");
+    if (!item) return;
+    const id = item.dataset.id;
+    if (button.dataset.action === "restore") restoreHistoryEntry(id);
+    if (button.dataset.action === "delete") deleteHistoryEntry(id);
+  });
+}
+
+if (saveQuoteButton) {
+  saveQuoteButton.addEventListener("click", () => {
+    const input = readForm();
+    const prices = computeQuote(input);
+    const entry = {
+      id: `q_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+      savedAt: new Date().toISOString(),
+      input,
+      prices,
+    };
+    const entries = [entry, ...loadHistory()];
+    saveHistory(entries);
+    renderHistory();
+    showToast({
+      type: "success",
+      title: "Quote saved",
+      message: `Stored ${input.clientName || "this quote"} in your history.`,
+    });
+  });
+}
+
+if (clearHistoryButton) {
+  clearHistoryButton.addEventListener("click", () => {
+    if (!loadHistory().length) return;
+    saveHistory([]);
+    renderHistory();
+    showToast({
+      type: "info",
+      title: "History cleared",
+      message: "All saved quotes were removed from this browser.",
+    });
+  });
+}
+
+renderHistory();
+
 function applyHashStateIfPresent() {
   const hash = window.location.hash || "";
   const match = hash.match(/q=([^&]+)/);

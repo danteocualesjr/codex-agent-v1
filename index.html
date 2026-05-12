@@ -45,6 +45,7 @@
         </a>
         <nav class="topbar-nav" aria-label="Primary">
           <a class="nav-link" href="#quote">Quote tool</a>
+          <a class="nav-link" href="#history">History</a>
           <a class="nav-link" href="#pricing">Pricing</a>
           <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false" title="Toggle theme">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -251,7 +252,7 @@
             </div>
           </form>
 
-          <section class="panel output-panel" aria-live="polite">
+          <section class="panel output-panel" aria-live="polite" id="output-panel">
             <div class="section-heading">
               <p class="eyebrow">Output</p>
               <h3>Recommended pricing</h3>
@@ -350,11 +351,40 @@
                     </svg>
                     Share
                   </button>
+                  <button id="saveQuote" class="ghost-button" type="button" title="Save this quote to your history">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M6 4h12v16l-6-4-6 4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Save
+                  </button>
                 </div>
               </div>
               <pre id="proposalText"></pre>
             </article>
           </section>
+        </section>
+
+        <section class="panel history-panel" id="history">
+          <div class="history-head">
+            <div class="section-heading">
+              <p class="eyebrow">Pipeline</p>
+              <h3>Saved quote history</h3>
+              <p class="section-sub">Quickly reload past quotes to remix or compare.</p>
+            </div>
+            <div class="history-meta">
+              <span id="historyCount" class="history-count">0 saved</span>
+              <button id="clearHistory" class="ghost-button" type="button">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 7h14M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Clear all
+              </button>
+            </div>
+          </div>
+          <ul id="historyList" class="history-list"></ul>
+          <p id="historyEmpty" class="history-empty">
+            Save quotes from the proposal panel above to build a personal pipeline log.
+          </p>
         </section>
 
         <section class="panel monetization-panel" id="pricing">
