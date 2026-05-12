@@ -1598,3 +1598,77 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
     grid-auto-flow: row;
   }
 }
+
+/* ---------- print ---------- */
+body.is-printing {
+  background: white !important;
+}
+
+@media print {
+  @page {
+    margin: 18mm 14mm;
+  }
+
+  html,
+  body {
+    background: white !important;
+    color: #111 !important;
+  }
+
+  body::before,
+  .bg-orbs,
+  .topbar,
+  .hero,
+  .form-panel,
+  .output-panel > .section-heading,
+  .output-panel > .price-strip,
+  .output-panel > .grid.metrics,
+  .output-panel > .grid.callouts,
+  .monetization-panel,
+  .site-footer,
+  .toast-stack,
+  .proposal-actions,
+  #riskMeterFill {
+    display: none !important;
+  }
+
+  .page-shell {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .panel,
+  .output-panel {
+    border: none !important;
+    background: white !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    animation: none !important;
+  }
+
+  .proposal-box {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    padding: 0 !important;
+    page-break-inside: avoid;
+  }
+
+  .proposal-head {
+    margin-bottom: 12px;
+  }
+
+  .proposal-box pre {
+    max-height: none !important;
+    overflow: visible !important;
+    background: white !important;
+    border: none !important;
+    color: #111 !important;
+    padding: 0 !important;
+    font-size: 11pt;
+    line-height: 1.55;
+  }
+}

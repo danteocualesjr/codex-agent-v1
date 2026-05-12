@@ -719,6 +719,21 @@ if (downloadProposalButton) {
   });
 }
 
+const printProposalButton = document.querySelector("#printProposal");
+if (printProposalButton) {
+  printProposalButton.addEventListener("click", () => {
+    document.body.classList.add("is-printing");
+    const cleanup = () => {
+      document.body.classList.remove("is-printing");
+      window.removeEventListener("afterprint", cleanup);
+    };
+    window.addEventListener("afterprint", cleanup);
+    window.setTimeout(() => {
+      window.print();
+    }, 50);
+  });
+}
+
 for (const button of billingButtons) {
   button.addEventListener("click", () => {
     setBilling(button.dataset.billing);
