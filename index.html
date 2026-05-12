@@ -141,15 +141,26 @@
               </label>
             </div>
 
-            <div class="grid two-up">
+            <div class="grid three-up">
               <label>
                 <span>Estimated hours</span>
                 <input id="hours" type="number" min="1" value="40" />
               </label>
 
               <label>
-                <span>Your target hourly rate (USD)</span>
+                <span>Target hourly rate</span>
                 <input id="rate" type="number" min="25" value="90" />
+              </label>
+
+              <label>
+                <span>Currency</span>
+                <select id="currency">
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                  <option value="CAD">CAD ($)</option>
+                  <option value="AUD">AUD ($)</option>
+                </select>
               </label>
             </div>
 

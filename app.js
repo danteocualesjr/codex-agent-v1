@@ -1,8 +1,23 @@
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+const currencyLocales = {
+  USD: "en-US",
+  EUR: "en-IE",
+  GBP: "en-GB",
+  CAD: "en-CA",
+  AUD: "en-AU",
+};
+
+let activeCurrency = "USD";
+
+function buildCurrencyFormatter(code) {
+  return new Intl.NumberFormat(currencyLocales[code] || "en-US", {
+    style: "currency",
+    currency: code,
+    maximumFractionDigits: 0,
+  });
+}
+
+let currency = buildCurrencyFormatter(activeCurrency);
+const planCurrency = buildCurrencyFormatter("USD");
 
 const projectMultipliers = {
   brand: 1,
@@ -165,7 +180,7 @@ function renderList(selector, items) {
 }
 
 function formatPlanPrice(amount, billing) {
-  return `${currency.format(amount)}/${billing === "monthly" ? "month" : "month billed yearly"}`;
+  return `${planCurrency.format(amount)}/${billing === "monthly" ? "month" : "month billed yearly"}`;
 }
 
 function computeQuote(input) {
@@ -217,6 +232,10 @@ function computeQuote(input) {
 }
 
 function updateOutput(input) {
+  if (input.currency && input.currency !== activeCurrency) {
+    activeCurrency = input.currency;
+    currency = buildCurrencyFormatter(activeCurrency);
+  }
   const prices = computeQuote(input);
   document.querySelector("#floorPrice").textContent = currency.format(prices.floor);
   document.querySelector("#recommendedPrice").textContent = currency.format(prices.recommended);
@@ -252,6 +271,7 @@ function readForm() {
     budgetConfidence: document.querySelector("#budgetConfidence").value,
     hours: Number(document.querySelector("#hours").value || 0),
     rate: Number(document.querySelector("#rate").value || 0),
+    currency: document.querySelector("#currency")?.value || "USD",
     timeline: document.querySelector("#timeline").value,
     revisions: document.querySelector("#revisions").value,
     stakeholders: document.querySelector("#stakeholders").value,
@@ -265,6 +285,10 @@ function writeForm(input) {
   document.querySelector("#budgetConfidence").value = input.budgetConfidence;
   document.querySelector("#hours").value = input.hours;
   document.querySelector("#rate").value = input.rate;
+  const currencySelect = document.querySelector("#currency");
+  if (currencySelect && input.currency) {
+    currencySelect.value = input.currency;
+  }
   document.querySelector("#timeline").value = input.timeline;
   document.querySelector("#revisions").value = input.revisions;
   document.querySelector("#stakeholders").value = input.stakeholders;
@@ -315,7 +339,7 @@ function setBilling(billing) {
 
   for (const priceNode of document.querySelectorAll("[data-price]")) {
     const plan = priceNode.dataset.price;
-    priceNode.textContent = currency.format(pricingCatalog[plan][billing]);
+    priceNode.textContent = planCurrency.format(pricingCatalog[plan][billing]);
   }
 
   updateCheckoutPanel();
@@ -377,7 +401,7 @@ function updateCheckoutPanel() {
   const monthlyPrice = selectedPlan.monthly;
   const yearlyPrice = selectedPlan.yearly;
   const activePrice = selectedPlan[billing];
-  const annualSavings = currency.format((monthlyPrice - yearlyPrice) * 12);
+  const annualSavings = planCurrency.format((monthlyPrice - yearlyPrice) * 12);
 
   document.querySelector("#selectedPlanLabel").textContent = `${selectedPlan.name} plan selected`;
   document.querySelector("#selectedBilling").textContent =
@@ -434,6 +458,15 @@ scopeForm.addEventListener("submit", (event) => {
   updateOutput(input);
 });
 
+const currencySelect = document.querySelector("#currency");
+if (currencySelect) {
+  currencySelect.addEventListener("change", () => {
+    const input = readForm();
+    persistState(input);
+    updateOutput(input);
+  });
+}
+
 copyProposalButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(proposalText.textContent);
@@ -479,7 +512,11 @@ teamSize.addEventListener("change", () => {
 
 const savedState = loadState();
 if (savedState) {
+  if (!savedState.currency) savedState.currency = "USD";
+  if (!Array.isArray(savedState.deliverables)) savedState.deliverables = [];
   writeForm(savedState);
+  activeCurrency = savedState.currency;
+  currency = buildCurrencyFormatter(activeCurrency);
 }
 
 const savedPricingState = loadPricingState();
