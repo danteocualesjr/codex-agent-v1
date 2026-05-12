@@ -87,6 +87,9 @@ function loadTheme() {
 
 applyTheme(loadTheme());
 
+const isMacLike = /Mac|iPad|iPhone|iPod/.test(navigator.platform || navigator.userAgent || "");
+document.documentElement.dataset.os = isMacLike ? "mac" : "other";
+
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
     const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
@@ -566,6 +569,24 @@ scopeForm.addEventListener("submit", (event) => {
   const input = readForm();
   persistState(input);
   updateOutput(input);
+});
+
+document.addEventListener("keydown", (event) => {
+  const isSubmitCombo = (event.metaKey || event.ctrlKey) && event.key === "Enter";
+  if (isSubmitCombo) {
+    event.preventDefault();
+    const submitButton = scopeForm.querySelector(".submit-button");
+    if (submitButton) {
+      submitButton.classList.add("is-flash");
+      window.setTimeout(() => submitButton.classList.remove("is-flash"), 600);
+    }
+    if (typeof scopeForm.requestSubmit === "function") {
+      scopeForm.requestSubmit();
+    } else {
+      scopeForm.dispatchEvent(new Event("submit", { cancelable: true }));
+    }
+    document.querySelector("#quote")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 });
 
 const resetButton = document.querySelector("#resetForm");

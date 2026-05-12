@@ -788,6 +788,43 @@ select {
   font-size: 1rem;
 }
 
+.submit-button.is-flash {
+  filter: brightness(1.08);
+  box-shadow: 0 0 0 4px rgba(13, 110, 102, 0.32), 0 12px 24px rgba(13, 110, 102, 0.34);
+}
+
+.kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.14);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.92);
+  margin-left: 4px;
+}
+
+.kbd-modifier.kbd-ctrl {
+  display: none;
+}
+
+@supports not (selector(:has(*))) {
+  .kbd-modifier.kbd-ctrl { display: inline; }
+  .kbd-modifier:not(.kbd-ctrl) { display: none; }
+}
+
+html[data-os="other"] .kbd-modifier.kbd-ctrl { display: inline; }
+html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
+
+@media (max-width: 700px) {
+  .kbd-hint { display: none; }
+}
+
 .form-actions {
   display: grid;
   grid-template-columns: 1fr auto;
