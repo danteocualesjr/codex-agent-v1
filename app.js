@@ -275,7 +275,9 @@ function buildMarkdownProposal(input, prices, riskScore) {
 }
 
 function buildProposal(input, prices, riskScore) {
-  const deliverableList = input.deliverables.map(titleize).join(", ");
+  const deliverableList = input.deliverables.length
+    ? input.deliverables.map(titleize).join(", ")
+    : "(none specified)";
   const rushLine =
     input.timeline === "rush"
       ? "A rush delivery premium is included to protect focus and availability."
@@ -311,6 +313,7 @@ Risk notes
 
 function renderList(selector, items) {
   const target = document.querySelector(selector);
+  if (!target) return;
   target.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
 }
 
