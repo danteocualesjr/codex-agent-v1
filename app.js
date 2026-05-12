@@ -60,6 +60,42 @@ const budgetRiskAdjustments = {
   high: 0.4,
 };
 
+const themeStorageKey = "scopemint-theme";
+const themeToggle = document.querySelector("#themeToggle");
+
+function applyTheme(theme) {
+  const next = theme === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = next;
+  if (themeToggle) {
+    themeToggle.setAttribute("aria-pressed", String(next === "dark"));
+    themeToggle.setAttribute(
+      "aria-label",
+      next === "dark" ? "Switch to light mode" : "Switch to dark mode"
+    );
+  }
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    meta.setAttribute("content", next === "dark" ? "#0f1417" : "#f4efe7");
+  }
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem(themeStorageKey);
+  if (saved === "dark" || saved === "light") return saved;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+applyTheme(loadTheme());
+
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+    const next = current === "dark" ? "light" : "dark";
+    localStorage.setItem(themeStorageKey, next);
+    applyTheme(next);
+  });
+}
+
 const scopeForm = document.querySelector("#scope-form");
 const proposalText = document.querySelector("#proposalText");
 const copyProposalButton = document.querySelector("#copyProposal");
