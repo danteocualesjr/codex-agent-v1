@@ -126,7 +126,11 @@ function loadTheme() {
 
 applyTheme(loadTheme());
 
-const isMacLike = /Mac|iPad|iPhone|iPod/.test(navigator.platform || navigator.userAgent || "");
+const ua = navigator.userAgent || "";
+const platformHint = navigator.userAgentData?.platform || "";
+const isMacLike =
+  platformHint === "macOS" ||
+  /Macintosh|Mac OS X|iPhone|iPad|iPod/.test(ua);
 document.documentElement.dataset.os = isMacLike ? "mac" : "other";
 
 if (themeToggle) {
