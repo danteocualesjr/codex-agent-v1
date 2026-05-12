@@ -9,6 +9,7 @@ const currencyLocales = {
 let activeCurrency = "USD";
 
 function buildCurrencyFormatter(code) {
+  
   return new Intl.NumberFormat(currencyLocales[code] || "en-US", {
     style: "currency",
     currency: code,
