@@ -189,9 +189,16 @@ function buildProposal(input, prices, riskScore) {
       ? "A rush delivery premium is included to protect focus and availability."
       : "The proposed timeline assumes standard turnaround and consolidated feedback.";
 
-  return `Project: ${titleize(input.projectType)} engagement
-Recommended investment: ${currency.format(prices.recommended)}
-Payment schedule: ${prices.paymentPlan}
+  const headerLines = [];
+  if (input.clientName) headerLines.push(`Prepared for: ${input.clientName}`);
+  if (input.projectName) {
+    headerLines.push(`Project name: ${input.projectName}`);
+  }
+  headerLines.push(`Engagement type: ${titleize(input.projectType)}`);
+  headerLines.push(`Recommended investment: ${currency.format(prices.recommended)}`);
+  headerLines.push(`Payment schedule: ${prices.paymentPlan}`);
+
+  return `${headerLines.join("\n")}
 
 Scope
 - Estimated effort: ${input.hours} hours at a target internal rate of ${currency.format(input.rate)}/hr
@@ -303,6 +310,8 @@ function updateOutput(input) {
 
 function readForm() {
   return {
+    clientName: document.querySelector("#clientName")?.value.trim() || "",
+    projectName: document.querySelector("#projectName")?.value.trim() || "",
     projectType: document.querySelector("#projectType").value,
     budgetConfidence: document.querySelector("#budgetConfidence").value,
     hours: Number(document.querySelector("#hours").value || 0),
@@ -317,6 +326,10 @@ function readForm() {
 }
 
 function writeForm(input) {
+  const clientNameField = document.querySelector("#clientName");
+  if (clientNameField) clientNameField.value = input.clientName || "";
+  const projectNameField = document.querySelector("#projectName");
+  if (projectNameField) projectNameField.value = input.projectName || "";
   document.querySelector("#projectType").value = input.projectType;
   document.querySelector("#budgetConfidence").value = input.budgetConfidence;
   document.querySelector("#hours").value = input.hours;
