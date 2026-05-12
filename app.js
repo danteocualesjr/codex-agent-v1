@@ -60,6 +60,45 @@ const budgetRiskAdjustments = {
   high: 0.4,
 };
 
+const toastStack = document.querySelector("#toastStack");
+const toastIcons = {
+  success:
+    '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  error:
+    '<svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5M12 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>',
+  info:
+    '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 7.5h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+};
+
+function showToast({ title, message = "", type = "info", duration = 3200 } = {}) {
+  if (!toastStack || !title) return;
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <span class="toast-icon" aria-hidden="true">${toastIcons[type] || toastIcons.info}</span>
+    <div class="toast-body">
+      <p class="toast-title">${title}</p>
+      ${message ? `<p class="toast-message">${message}</p>` : ""}
+    </div>
+    <button type="button" class="toast-close" aria-label="Dismiss">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  `;
+
+  const dismiss = () => {
+    toast.classList.add("is-leaving");
+    toast.classList.remove("is-visible");
+    window.setTimeout(() => toast.remove(), 240);
+  };
+
+  toast.querySelector(".toast-close").addEventListener("click", dismiss);
+  toastStack.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("is-visible"));
+  if (duration > 0) {
+    window.setTimeout(dismiss, duration);
+  }
+}
+
 const themeStorageKey = "scopemint-theme";
 const themeToggle = document.querySelector("#themeToggle");
 
@@ -525,9 +564,19 @@ async function copyCheckoutLink() {
     await navigator.clipboard.writeText(link);
     checkoutMessage.textContent = `Checkout link copied: ${link}`;
     checkoutMessage.classList.add("is-success");
+    showToast({
+      type: "success",
+      title: "Checkout link copied",
+      message: "Share it with the buyer to start the trial.",
+    });
   } catch {
     checkoutMessage.textContent = "Could not copy the checkout link in this browser.";
     checkoutMessage.classList.remove("is-success");
+    showToast({
+      type: "error",
+      title: "Copy failed",
+      message: "Your browser blocked clipboard access.",
+    });
   }
 }
 
@@ -599,6 +648,11 @@ if (resetButton) {
     updateOutput(readForm());
     resetButton.classList.add("is-flash");
     window.setTimeout(() => resetButton.classList.remove("is-flash"), 600);
+    showToast({
+      type: "info",
+      title: "Form cleared",
+      message: "Defaults restored. Build a new quote when you are ready.",
+    });
   });
 }
 
@@ -615,11 +669,21 @@ copyProposalButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(proposalText.textContent);
     copyProposalButton.textContent = "Copied";
+    showToast({
+      type: "success",
+      title: "Proposal copied",
+      message: "Paste it into email, Notion, or your CRM.",
+    });
     window.setTimeout(() => {
       copyProposalButton.textContent = "Copy text";
     }, 1200);
   } catch {
     copyProposalButton.textContent = "Copy failed";
+    showToast({
+      type: "error",
+      title: "Copy failed",
+      message: "Your browser blocked clipboard access.",
+    });
     window.setTimeout(() => {
       copyProposalButton.textContent = "Copy text";
     }, 1200);
@@ -647,6 +711,11 @@ if (downloadProposalButton) {
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
+    showToast({
+      type: "success",
+      title: "Markdown downloaded",
+      message: `${slug}.md saved to your downloads.`,
+    });
   });
 }
 

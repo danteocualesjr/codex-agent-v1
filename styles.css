@@ -1374,6 +1374,133 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   letter-spacing: 0.04em;
 }
 
+/* ---------- toasts ---------- */
+.toast-stack {
+  position: fixed;
+  z-index: 60;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: min(380px, calc(100vw - 32px));
+}
+
+.toast {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--panel-strong);
+  color: var(--ink);
+  box-shadow: var(--shadow-md);
+  transform: translateY(8px);
+  opacity: 0;
+  transition: transform 220ms var(--ease), opacity 220ms var(--ease);
+}
+
+.toast.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast.is-leaving {
+  transform: translateY(8px);
+  opacity: 0;
+}
+
+.toast .toast-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  flex-shrink: 0;
+}
+
+.toast .toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toast .toast-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toast .toast-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.toast .toast-message {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.toast.toast-success .toast-icon {
+  background: rgba(21, 122, 58, 0.16);
+  color: var(--success);
+}
+
+.toast.toast-error .toast-icon {
+  background: rgba(181, 58, 20, 0.16);
+  color: var(--danger);
+}
+
+.toast.toast-info .toast-icon {
+  background: var(--highlight-soft);
+  color: var(--highlight);
+}
+
+.toast .toast-close {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  transition: color 140ms var(--ease), background 140ms var(--ease);
+}
+
+.toast .toast-close:hover {
+  color: var(--ink);
+  background: rgba(60, 38, 18, 0.08);
+}
+
+[data-theme="dark"] .toast .toast-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.toast .toast-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 700px) {
+  .toast-stack {
+    bottom: 16px;
+    right: 12px;
+    left: 12px;
+    max-width: none;
+  }
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 1080px) {
   .workspace {
