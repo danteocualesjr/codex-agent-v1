@@ -58,6 +58,8 @@ const teamSize = document.querySelector("#teamSize");
 const checkoutMessage = document.querySelector("#checkoutMessage");
 const checkoutButton = document.querySelector("#checkoutButton");
 const copyCheckoutLinkButton = document.querySelector("#copyCheckoutLink");
+const riskMeterFill = document.querySelector("#riskMeterFill");
+const footerYear = document.querySelector("#footerYear");
 
 const pricingCatalog = {
   starter: {
@@ -220,6 +222,11 @@ function updateOutput(input) {
   document.querySelector("#recommendedPrice").textContent = currency.format(prices.recommended);
   document.querySelector("#stretchPrice").textContent = currency.format(prices.stretch);
   document.querySelector("#riskScore").textContent = `${prices.riskScore}/10`;
+  if (riskMeterFill) {
+    riskMeterFill.style.width = `${Math.min(100, (prices.riskScore / 10) * 100)}%`;
+    riskMeterFill.dataset.level =
+      prices.riskScore >= 7 ? "high" : prices.riskScore >= 4 ? "medium" : "low";
+  }
   document.querySelector("#riskSummary").textContent =
     prices.riskScore >= 7
       ? "High-friction deal. Protect margin and tighten scope."
@@ -486,3 +493,7 @@ if (savedPricingState.teamSize) {
 setBilling(savedPricingState.billing || "monthly");
 setPlan(savedPricingState.plan || "pro");
 updateOutput(readForm());
+
+if (footerYear) {
+  footerYear.textContent = new Date().getFullYear();
+}
