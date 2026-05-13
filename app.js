@@ -146,6 +146,7 @@ if (themeToggle) {
 const scopeForm = document.querySelector("#scope-form");
 const proposalText = document.querySelector("#proposalText");
 const copyProposalButton = document.querySelector("#copyProposal");
+const copyProposalLabel = copyProposalButton?.querySelector(".ghost-button-label");
 const storageKey = "scopemint-mvp-state";
 const pricingStorageKey = "scopemint-pricing-state";
 const billingButtons = [...document.querySelectorAll("[data-billing]")];
@@ -674,26 +675,29 @@ if (currencySelect) {
 }
 
 copyProposalButton.addEventListener("click", async () => {
+  const setLabel = (text) => {
+    if (copyProposalLabel) copyProposalLabel.textContent = text;
+  };
   try {
     await navigator.clipboard.writeText(proposalText.textContent);
-    copyProposalButton.textContent = "Copied";
+    setLabel("Copied");
     showToast({
       type: "success",
       title: "Proposal copied",
       message: "Paste it into email, Notion, or your CRM.",
     });
     window.setTimeout(() => {
-      copyProposalButton.textContent = "Copy text";
+      setLabel("Copy text");
     }, 1200);
   } catch {
-    copyProposalButton.textContent = "Copy failed";
+    setLabel("Copy failed");
     showToast({
       type: "error",
       title: "Copy failed",
       message: "Your browser blocked clipboard access.",
     });
     window.setTimeout(() => {
-      copyProposalButton.textContent = "Copy text";
+      setLabel("Copy text");
     }, 1200);
   }
 });
