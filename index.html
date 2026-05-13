@@ -290,10 +290,20 @@
 
             <div class="grid two-up metrics">
               <article>
-                <span class="metric-label">Risk score</span>
+                <span class="metric-label" id="riskScoreLabel">Risk score</span>
                 <strong id="riskScore">0/10</strong>
-                <div class="risk-meter" aria-hidden="true">
-                  <span id="riskMeterFill"></span>
+                <div
+                  class="risk-meter"
+                  id="riskMeter"
+                  role="progressbar"
+                  aria-valuemin="1"
+                  aria-valuemax="10"
+                  aria-valuenow="1"
+                  aria-labelledby="riskScoreLabel"
+                  aria-describedby="riskSummary"
+                  aria-valuetext="Risk score 1 out of 10."
+                >
+                  <span id="riskMeterFill" aria-hidden="true"></span>
                 </div>
                 <p id="riskSummary"></p>
               </article>
