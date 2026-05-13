@@ -886,6 +886,27 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   box-shadow: none;
 }
 
+.brand-lockup:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.primary-button:focus-visible,
+.ghost-button:focus-visible,
+.theme-toggle:focus-visible,
+.toggle-pill:focus-visible,
+.history-item .icon-button:focus-visible,
+.toast .toast-close:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
 /* ---------- output: price strip ---------- */
 .price-strip {
   grid-template-columns: 1fr 1.25fr 1fr;
