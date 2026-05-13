@@ -158,6 +158,7 @@ const checkoutMessage = document.querySelector("#checkoutMessage");
 const checkoutButton = document.querySelector("#checkoutButton");
 const copyCheckoutLinkButton = document.querySelector("#copyCheckoutLink");
 const riskMeterFill = document.querySelector("#riskMeterFill");
+const riskMeter = document.querySelector("#riskMeter");
 const footerYear = document.querySelector("#footerYear");
 
 const pricingCatalog = {
@@ -380,18 +381,27 @@ function updateOutput(input) {
   document.querySelector("#floorPrice").textContent = currency.format(prices.floor);
   document.querySelector("#recommendedPrice").textContent = currency.format(prices.recommended);
   document.querySelector("#stretchPrice").textContent = currency.format(prices.stretch);
+  const riskSummaryText =
+    prices.riskScore >= 7
+      ? "High-friction deal. Protect margin and tighten scope."
+      : prices.riskScore >= 4
+        ? "Healthy but needs clear guardrails."
+        : "Low-friction opportunity with solid close potential.";
   document.querySelector("#riskScore").textContent = `${prices.riskScore}/10`;
   if (riskMeterFill) {
     riskMeterFill.style.width = `${Math.min(100, (prices.riskScore / 10) * 100)}%`;
     riskMeterFill.dataset.level =
       prices.riskScore >= 7 ? "high" : prices.riskScore >= 4 ? "medium" : "low";
   }
-  document.querySelector("#riskSummary").textContent =
-    prices.riskScore >= 7
-      ? "High-friction deal. Protect margin and tighten scope."
-      : prices.riskScore >= 4
-        ? "Healthy but needs clear guardrails."
-        : "Low-friction opportunity with solid close potential.";
+  document.querySelector("#riskSummary").textContent = riskSummaryText;
+  if (riskMeter) {
+    const rounded = Math.min(10, Math.max(1, Math.round(Number(prices.riskScore))));
+    riskMeter.setAttribute("aria-valuenow", String(rounded));
+    riskMeter.setAttribute(
+      "aria-valuetext",
+      `Risk score ${prices.riskScore} out of 10. ${riskSummaryText}`
+    );
+  }
   document.querySelector("#paymentPlan").textContent = prices.paymentPlan;
   document.querySelector("#paymentSummary").textContent =
     prices.paymentPlan === "Monthly prepay"
