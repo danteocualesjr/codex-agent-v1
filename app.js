@@ -20,6 +20,52 @@ function buildCurrencyFormatter(code) {
 let currency = buildCurrencyFormatter(activeCurrency);
 const planCurrency = buildCurrencyFormatter("USD");
 
+const prefersReducedMotion =
+  typeof window !== "undefined" && typeof window.matchMedia === "function"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : null;
+
+const numberAnimationState = new WeakMap();
+
+function animateCurrency(element, targetValue, formatter, duration = 520) {
+  if (!element) return;
+  const target = Number.isFinite(targetValue) ? Math.round(targetValue) : 0;
+  const previous = numberAnimationState.get(element);
+  if (previous && previous.frame) {
+    cancelAnimationFrame(previous.frame);
+  }
+  const fromValue = previous ? previous.current : target;
+  if (
+    prefersReducedMotion?.matches ||
+    duration <= 0 ||
+    fromValue === target ||
+    typeof requestAnimationFrame !== "function"
+  ) {
+    element.textContent = formatter.format(target);
+    numberAnimationState.set(element, { current: target, frame: null });
+    return;
+  }
+  const start = performance.now();
+  const delta = target - fromValue;
+  const ease = (t) => 1 - Math.pow(1 - t, 3);
+  const state = { current: fromValue, frame: 0 };
+  numberAnimationState.set(element, state);
+  const step = (now) => {
+    const progress = Math.min(1, (now - start) / duration);
+    const value = Math.round(fromValue + delta * ease(progress));
+    state.current = value;
+    element.textContent = formatter.format(value);
+    if (progress < 1) {
+      state.frame = requestAnimationFrame(step);
+    } else {
+      state.current = target;
+      state.frame = null;
+      element.textContent = formatter.format(target);
+    }
+  };
+  state.frame = requestAnimationFrame(step);
+}
+
 const projectMultipliers = {
   brand: 1,
   web: 1.2,
@@ -377,9 +423,9 @@ function updateOutput(input) {
     currency = buildCurrencyFormatter(activeCurrency);
   }
   const prices = computeQuote(input);
-  document.querySelector("#floorPrice").textContent = currency.format(prices.floor);
-  document.querySelector("#recommendedPrice").textContent = currency.format(prices.recommended);
-  document.querySelector("#stretchPrice").textContent = currency.format(prices.stretch);
+  animateCurrency(document.querySelector("#floorPrice"), prices.floor, currency);
+  animateCurrency(document.querySelector("#recommendedPrice"), prices.recommended, currency, 640);
+  animateCurrency(document.querySelector("#stretchPrice"), prices.stretch, currency);
   document.querySelector("#riskScore").textContent = `${prices.riskScore}/10`;
   if (riskMeterFill) {
     riskMeterFill.style.width = `${Math.min(100, (prices.riskScore / 10) * 100)}%`;
