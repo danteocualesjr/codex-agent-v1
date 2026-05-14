@@ -193,6 +193,28 @@ body::before {
   backdrop-filter: saturate(140%) blur(18px);
   -webkit-backdrop-filter: saturate(140%) blur(18px);
   box-shadow: var(--shadow-sm);
+  transition:
+    background 240ms var(--ease),
+    border-color 240ms var(--ease),
+    box-shadow 240ms var(--ease),
+    transform 240ms var(--ease);
+}
+
+.topbar.is-scrolled {
+  background: rgba(255, 251, 244, 0.92);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .topbar {
+  background: rgba(20, 26, 31, 0.62);
+}
+
+[data-theme="dark"] .topbar.is-scrolled {
+  background: rgba(20, 26, 31, 0.88);
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .brand-lockup {

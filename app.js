@@ -1096,3 +1096,27 @@ window.addEventListener("hashchange", () => {
 if (footerYear) {
   footerYear.textContent = new Date().getFullYear();
 }
+
+(function setupScrollAwareTopbar() {
+  const topbar = document.querySelector(".topbar");
+  if (!topbar) return;
+  const threshold = 24;
+  let ticking = false;
+  let lastScrolled = false;
+  const update = () => {
+    ticking = false;
+    const scrolled = window.scrollY > threshold;
+    if (scrolled !== lastScrolled) {
+      topbar.classList.toggle("is-scrolled", scrolled);
+      lastScrolled = scrolled;
+    }
+  };
+  const onScroll = () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  update();
+})();
