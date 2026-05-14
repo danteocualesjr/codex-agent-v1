@@ -1097,26 +1097,53 @@ if (footerYear) {
   footerYear.textContent = new Date().getFullYear();
 }
 
-(function setupScrollAwareTopbar() {
+(function setupScrollListeners() {
   const topbar = document.querySelector(".topbar");
-  if (!topbar) return;
-  const threshold = 24;
+  const backToTop = document.querySelector("#backToTop");
+  if (!topbar && !backToTop) return;
+
+  const topbarThreshold = 24;
+  const fabThreshold = 480;
   let ticking = false;
-  let lastScrolled = false;
+  let lastTopbarScrolled = false;
+  let lastFabVisible = false;
+
   const update = () => {
     ticking = false;
-    const scrolled = window.scrollY > threshold;
-    if (scrolled !== lastScrolled) {
-      topbar.classList.toggle("is-scrolled", scrolled);
-      lastScrolled = scrolled;
+    const y = window.scrollY;
+    if (topbar) {
+      const scrolled = y > topbarThreshold;
+      if (scrolled !== lastTopbarScrolled) {
+        topbar.classList.toggle("is-scrolled", scrolled);
+        lastTopbarScrolled = scrolled;
+      }
+    }
+    if (backToTop) {
+      const visible = y > fabThreshold;
+      if (visible !== lastFabVisible) {
+        backToTop.classList.toggle("is-visible", visible);
+        lastFabVisible = visible;
+      }
     }
   };
+
   const onScroll = () => {
     if (!ticking) {
       ticking = true;
       requestAnimationFrame(update);
     }
   };
+
   window.addEventListener("scroll", onScroll, { passive: true });
+
+  if (backToTop) {
+    backToTop.addEventListener("click", () => {
+      const reduceMotion =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    });
+  }
+
   update();
 })();
