@@ -312,6 +312,12 @@ body::before {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.nav-link.is-active,
+.nav-link.is-active:hover {
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
 .theme-toggle {
   width: 38px;
   height: 38px;

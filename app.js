@@ -1147,3 +1147,57 @@ if (footerYear) {
 
   update();
 })();
+
+(function setupNavScrollSpy() {
+  if (typeof IntersectionObserver !== "function") return;
+  const navLinks = Array.from(document.querySelectorAll(".topbar-nav .nav-link"));
+  if (!navLinks.length) return;
+
+  const linkBySection = new Map();
+  const sections = [];
+  navLinks.forEach((link) => {
+    const href = link.getAttribute("href") || "";
+    if (!href.startsWith("#")) return;
+    const id = href.slice(1);
+    const section = document.getElementById(id);
+    if (!section) return;
+    linkBySection.set(id, link);
+    sections.push(section);
+  });
+  if (!sections.length) return;
+
+  const visibleRatios = new Map();
+  const setActive = (id) => {
+    navLinks.forEach((link) => {
+      const linkId = (link.getAttribute("href") || "").slice(1);
+      link.classList.toggle("is-active", linkId === id);
+    });
+  };
+
+  const pickActive = () => {
+    let bestId = null;
+    let bestRatio = 0;
+    visibleRatios.forEach((ratio, id) => {
+      if (ratio > bestRatio) {
+        bestRatio = ratio;
+        bestId = id;
+      }
+    });
+    setActive(bestRatio > 0 ? bestId : null);
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        visibleRatios.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0);
+      });
+      pickActive();
+    },
+    {
+      rootMargin: "-45% 0px -45% 0px",
+      threshold: [0, 0.25, 0.5, 0.75, 1],
+    }
+  );
+
+  sections.forEach((section) => observer.observe(section));
+})();
