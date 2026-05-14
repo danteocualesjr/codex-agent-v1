@@ -1825,8 +1825,35 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
     border-radius: 22px;
   }
 
+  .topbar-nav {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 4px;
+    margin: 0 -2px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .topbar-nav::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .topbar-nav::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border-radius: 999px;
+  }
+
   .nav-link {
-    display: none;
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-size: 0.82rem;
+    padding: 7px 11px;
   }
 
   .topbar,
