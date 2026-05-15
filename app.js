@@ -40,7 +40,7 @@ const prefersReducedMotion =
 
 const numberAnimationState = new WeakMap();
 
-function animateCurrency(element, targetValue, formatter, duration = 520) {
+function animateNumber(element, targetValue, format, duration = 520) {
   if (!element) return;
   const target = Number.isFinite(targetValue) ? Math.round(targetValue) : 0;
   const previous = numberAnimationState.get(element);
@@ -54,7 +54,7 @@ function animateCurrency(element, targetValue, formatter, duration = 520) {
     fromValue === target ||
     typeof requestAnimationFrame !== "function"
   ) {
-    element.textContent = formatter.format(target);
+    element.textContent = format(target);
     numberAnimationState.set(element, { current: target, frame: null });
     return;
   }
@@ -67,16 +67,20 @@ function animateCurrency(element, targetValue, formatter, duration = 520) {
     const progress = Math.min(1, (now - start) / duration);
     const value = Math.round(fromValue + delta * ease(progress));
     state.current = value;
-    element.textContent = formatter.format(value);
+    element.textContent = format(value);
     if (progress < 1) {
       state.frame = requestAnimationFrame(step);
     } else {
       state.current = target;
       state.frame = null;
-      element.textContent = formatter.format(target);
+      element.textContent = format(target);
     }
   };
   state.frame = requestAnimationFrame(step);
+}
+
+function animateCurrency(element, targetValue, formatter, duration = 520) {
+  animateNumber(element, targetValue, (v) => formatter.format(v), duration);
 }
 
 const projectMultipliers = {
@@ -440,7 +444,12 @@ function updateOutput(input) {
   animateCurrency(document.querySelector("#floorPrice"), prices.floor, currency);
   animateCurrency(document.querySelector("#recommendedPrice"), prices.recommended, currency, 640);
   animateCurrency(document.querySelector("#stretchPrice"), prices.stretch, currency);
-  document.querySelector("#riskScore").textContent = `${prices.riskScore}/10`;
+  animateNumber(
+    document.querySelector("#riskScore"),
+    prices.riskScore,
+    (v) => `${v}/10`,
+    720
+  );
   if (riskMeterFill) {
     riskMeterFill.style.width = `${Math.min(100, (prices.riskScore / 10) * 100)}%`;
     riskMeterFill.dataset.level =
