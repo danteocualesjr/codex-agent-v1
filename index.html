@@ -57,25 +57,34 @@
             <h1>ScopeMint</h1>
           </div>
         </a>
-        <nav class="topbar-nav" aria-label="Primary">
-          <a class="nav-link" href="#quote">Quote tool</a>
-          <a class="nav-link" href="#history">History</a>
-          <a class="nav-link" href="#pricing">Pricing</a>
-          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false" title="Toggle theme">
-            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" />
-              <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3a7.5 7.5 0 1 0 11.5 11.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
-            </svg>
-          </button>
-          <a class="primary-button compact" href="#quote">
-            Try it free
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </a>
+        <nav class="topbar-nav" id="topbarNav" aria-label="Primary">
+          <div class="nav-links">
+            <a class="nav-link" href="#quote">Quote tool</a>
+            <a class="nav-link" href="#history">History</a>
+            <a class="nav-link" href="#pricing">Pricing</a>
+          </div>
+          <div class="nav-actions">
+            <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false" title="Toggle theme">
+              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2" />
+                <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3a7.5 7.5 0 1 0 11.5 11.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              </svg>
+            </button>
+            <a class="primary-button compact" href="#quote">
+              Try it free
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+            <button id="navToggle" class="nav-toggle" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="topbarNav">
+              <span class="nav-toggle-bar" aria-hidden="true"></span>
+              <span class="nav-toggle-bar" aria-hidden="true"></span>
+              <span class="nav-toggle-bar" aria-hidden="true"></span>
+            </button>
+          </div>
         </nav>
       </header>
 
@@ -122,13 +131,48 @@
               </span>
             </div>
           </div>
-          <aside class="hero-card">
-            <p class="card-label">Why this can earn</p>
-            <ul class="check-list">
-              <li>Clear buyer: freelancers, studios, agencies</li>
-              <li>Strong pain: undercharging kills margin fast</li>
-              <li>Easy upsell path: templates, CRM, Stripe, AI polish</li>
-            </ul>
+          <aside class="hero-card hero-preview" aria-label="Sample quote preview">
+            <div class="hero-preview-head">
+              <div>
+                <p class="card-label">Live preview</p>
+                <p class="hero-preview-title">Acme Studio · Q3 Brand</p>
+              </div>
+              <span class="hero-preview-pill">
+                <span class="dot" aria-hidden="true"></span>
+                Auto-priced
+              </span>
+            </div>
+
+            <div class="hero-preview-prices" aria-hidden="true">
+              <div>
+                <span>Floor</span>
+                <strong>$3.6k</strong>
+              </div>
+              <div class="is-recommended">
+                <span>Recommended</span>
+                <strong>$4.9k</strong>
+              </div>
+              <div>
+                <span>Stretch</span>
+                <strong>$6.2k</strong>
+              </div>
+            </div>
+
+            <div class="hero-preview-row">
+              <div class="hero-preview-block">
+                <span class="metric-tag">Risk</span>
+                <div class="hero-preview-meter" aria-hidden="true">
+                  <span style="width: 38%"></span>
+                </div>
+                <p>3.8/10 · low friction</p>
+              </div>
+              <div class="hero-preview-block">
+                <span class="metric-tag">Payment</span>
+                <p class="hero-preview-pay">50 / 30 / 20</p>
+                <p class="hero-preview-pay-sub">Front-loads cash flow</p>
+              </div>
+            </div>
+
             <div class="hero-card-footer">
               <span class="metric-tag">Avg. quote lift</span>
               <strong>+27%</strong>
@@ -180,12 +224,19 @@
             <div class="grid three-up">
               <label>
                 <span>Estimated hours</span>
-                <input id="hours" type="number" min="1" value="40" />
+                <div class="input-wrap">
+                  <input id="hours" type="number" min="1" value="40" />
+                  <span class="input-suffix" aria-hidden="true">h</span>
+                </div>
               </label>
 
               <label>
                 <span>Target hourly rate</span>
-                <input id="rate" type="number" min="25" value="90" />
+                <div class="input-wrap">
+                  <span class="input-prefix" id="ratePrefix" aria-hidden="true">$</span>
+                  <input id="rate" type="number" min="25" value="90" />
+                  <span class="input-suffix" aria-hidden="true">/hr</span>
+                </div>
               </label>
 
               <label>
@@ -232,12 +283,49 @@
 
             <fieldset class="chip-fieldset">
               <legend>Deliverables</legend>
-              <label class="chip"><input type="checkbox" value="strategy" checked /><span>Strategy</span></label>
-              <label class="chip"><input type="checkbox" value="design" checked /><span>Design</span></label>
-              <label class="chip"><input type="checkbox" value="copy" /><span>Copy</span></label>
-              <label class="chip"><input type="checkbox" value="dev" /><span>Development</span></label>
-              <label class="chip"><input type="checkbox" value="analytics" /><span>Analytics</span></label>
-              <label class="chip"><input type="checkbox" value="handoff" checked /><span>Handoff</span></label>
+              <label class="chip">
+                <input type="checkbox" value="strategy" checked />
+                <svg class="chip-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 3l2.6 5.3 5.9.85-4.25 4.15 1 5.9L12 16.4l-5.25 2.8 1-5.9L3.5 9.15l5.9-.85L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                </svg>
+                <span>Strategy</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" value="design" checked />
+                <svg class="chip-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 19l7-7 3 3-7 7H5v-3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                  <path d="M14 7l3-3 3 3-3 3-3-3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                </svg>
+                <span>Design</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" value="copy" />
+                <svg class="chip-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 6h14M5 12h14M5 18h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                <span>Copy</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" value="dev" />
+                <svg class="chip-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M9 8l-4 4 4 4M15 8l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Development</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" value="analytics" />
+                <svg class="chip-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M5 19V11M10 19V5M15 19V13M20 19V8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                </svg>
+                <span>Analytics</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" value="handoff" checked />
+                <svg class="chip-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 12h12M11 7l5 5-5 5M20 5v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Handoff</span>
+              </label>
             </fieldset>
 
             <label>
@@ -534,12 +622,19 @@
           </section>
 
           <div class="launch-note">
-            <span class="launch-note-tag">Go-to-market</span>
-            <p>
-              Fastest path: sell this as a polished no-code-style quoting
-              assistant on X, LinkedIn, indie hacker communities, and
-              design/dev agency circles.
-            </p>
+            <span class="launch-note-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 13l3 3 11-11M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <div class="launch-note-body">
+              <span class="launch-note-tag">Go-to-market</span>
+              <p>
+                Fastest path: sell this as a polished no-code-style quoting
+                assistant on X, LinkedIn, indie hacker communities, and
+                design/dev agency circles.
+              </p>
+            </div>
           </div>
         </section>
       </main>

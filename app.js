@@ -6,6 +6,19 @@ const currencyLocales = {
   AUD: "en-AU",
 };
 
+const currencySymbols = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  CAD: "$",
+  AUD: "$",
+};
+
+function updateRatePrefix(code) {
+  const prefix = document.querySelector("#ratePrefix");
+  if (prefix) prefix.textContent = currencySymbols[code] || "$";
+}
+
 let activeCurrency = "USD";
 
 function buildCurrencyFormatter(code) {
@@ -422,6 +435,7 @@ function updateOutput(input) {
     activeCurrency = input.currency;
     currency = buildCurrencyFormatter(activeCurrency);
   }
+  updateRatePrefix(activeCurrency);
   const prices = computeQuote(input);
   animateCurrency(document.querySelector("#floorPrice"), prices.floor, currency);
   animateCurrency(document.querySelector("#recommendedPrice"), prices.recommended, currency, 640);
@@ -879,15 +893,25 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+const projectTypeLabels = {
+  brand: "Brand",
+  web: "Website",
+  app: "MVP App",
+  retainer: "Retainer",
+};
+
 function summarizeEntry(entry) {
   const projectLabel = entry.input.projectName
     || `${titleize(entry.input.projectType)} engagement`;
   const clientLabel = entry.input.clientName || "Untitled client";
   const formatter = buildCurrencyFormatter(entry.input.currency || "USD");
+  const riskScore = entry.prices.riskScore;
   return {
     title: `${clientLabel} · ${projectLabel}`,
     price: formatter.format(entry.prices.recommended),
-    risk: `Risk ${entry.prices.riskScore}/10`,
+    riskScore,
+    riskLevel: riskScore >= 7 ? "high" : riskScore >= 4 ? "medium" : "low",
+    typeTag: projectTypeLabels[entry.input.projectType] || titleize(entry.input.projectType || "Project"),
     saved: new Date(entry.savedAt).toLocaleString(),
   };
 }
@@ -921,8 +945,12 @@ function renderHistory() {
       <div class="history-info">
         <p class="history-title">${escapeHtml(summary.title)}</p>
         <div class="history-meta-row">
+          <span class="history-tag">${escapeHtml(summary.typeTag)}</span>
           <span class="history-price">${escapeHtml(summary.price)}</span>
-          <span>${escapeHtml(summary.risk)}</span>
+          <span class="history-risk">
+            <span class="history-risk-dot" data-level="${escapeHtml(summary.riskLevel)}"></span>
+            Risk ${summary.riskScore}/10
+          </span>
           <span>${escapeHtml(summary.saved)}</span>
         </div>
       </div>
@@ -1096,6 +1124,49 @@ window.addEventListener("hashchange", () => {
 if (footerYear) {
   footerYear.textContent = new Date().getFullYear();
 }
+
+(function setupMobileNav() {
+  const toggle = document.querySelector("#navToggle");
+  const nav = document.querySelector("#topbarNav");
+  if (!toggle || !nav) return;
+
+  const closeMenu = () => {
+    nav.classList.remove("is-open");
+    toggle.setAttribute("aria-expanded", "false");
+  };
+
+  const openMenu = () => {
+    nav.classList.add("is-open");
+    toggle.setAttribute("aria-expanded", "true");
+  };
+
+  toggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (nav.classList.contains("is-open")) closeMenu();
+    else openMenu();
+  });
+
+  nav.addEventListener("click", (event) => {
+    if (event.target.closest(".nav-link")) closeMenu();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!nav.classList.contains("is-open")) return;
+    if (event.target.closest("#topbarNav") || event.target.closest("#navToggle")) return;
+    closeMenu();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMenu();
+  });
+
+  const mq = window.matchMedia("(min-width: 821px)");
+  const onChange = () => {
+    if (mq.matches) closeMenu();
+  };
+  if (typeof mq.addEventListener === "function") mq.addEventListener("change", onChange);
+  else if (typeof mq.addListener === "function") mq.addListener(onChange);
+})();
 
 (function setupScrollListeners() {
   const topbar = document.querySelector(".topbar");
