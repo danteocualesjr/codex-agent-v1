@@ -548,8 +548,31 @@ function setBilling(billing) {
     priceNode.textContent = planCurrency.format(pricingCatalog[plan][billing]);
   }
 
+  positionBillingIndicator();
   updateCheckoutPanel();
 }
+
+const billingToggleEl = document.querySelector(".billing-toggle");
+const billingIndicatorEl = billingToggleEl?.querySelector(".toggle-indicator");
+
+function positionBillingIndicator() {
+  if (!billingToggleEl || !billingIndicatorEl) return;
+  const activePill = billingToggleEl.querySelector(".toggle-pill.is-active");
+  if (!activePill) return;
+  const containerRect = billingToggleEl.getBoundingClientRect();
+  const pillRect = activePill.getBoundingClientRect();
+  if (!pillRect.width) return;
+  const offset = pillRect.left - containerRect.left;
+  billingIndicatorEl.style.width = `${pillRect.width}px`;
+  billingIndicatorEl.style.transform = `translateX(${offset}px)`;
+  billingToggleEl.classList.add("is-ready");
+}
+
+if (billingToggleEl && typeof ResizeObserver === "function") {
+  const ro = new ResizeObserver(() => positionBillingIndicator());
+  ro.observe(billingToggleEl);
+}
+window.addEventListener("load", positionBillingIndicator);
 
 function setPlan(plan) {
   for (const card of planCards) {
