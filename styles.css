@@ -1453,6 +1453,31 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   line-height: 1.5;
 }
 
+.payment-breakdown {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.payment-breakdown li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+}
+
+.payment-breakdown strong {
+  margin: 0;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+
 .risk-meter {
   position: relative;
   height: 8px;

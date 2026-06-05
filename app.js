@@ -468,6 +468,32 @@ function renderOrderedList(selector, items) {
   target.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
 }
 
+function buildPaymentBreakdown(prices) {
+  if (prices.paymentPlan === "Monthly prepay") {
+    return [["Monthly prepay", prices.recommended]];
+  }
+  if (prices.paymentPlan.startsWith("60%")) {
+    return [
+      ["Deposit", prices.recommended * 0.6],
+      ["Midpoint", prices.recommended * 0.3],
+      ["Final", prices.recommended * 0.1],
+    ];
+  }
+  return [
+    ["Deposit", prices.recommended * 0.5],
+    ["Midpoint", prices.recommended * 0.3],
+    ["Final", prices.recommended * 0.2],
+  ];
+}
+
+function renderPaymentBreakdown(prices) {
+  const target = document.querySelector("#paymentBreakdown");
+  if (!target) return;
+  target.innerHTML = buildPaymentBreakdown(prices)
+    .map(([label, amount]) => `<li><span>${label}</span><strong>${currency.format(amount)}</strong></li>`)
+    .join("");
+}
+
 function formatPlanPrice(amount, billing) {
   return `${planCurrency.format(amount)}/${billing === "monthly" ? "month" : "month billed yearly"}`;
 }
@@ -580,6 +606,7 @@ function updateOutput(input) {
     prices.paymentPlan === "Monthly prepay"
       ? "Best for ongoing retainers with continuous scope."
       : "Front-load cash flow so the project starts safely.";
+  renderPaymentBreakdown(prices);
   const budgetFitStatus = document.querySelector("#budgetFitStatus");
   const budgetFitSummary = document.querySelector("#budgetFitSummary");
   if (budgetFitStatus && budgetFitSummary) {
