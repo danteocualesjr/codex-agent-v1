@@ -99,6 +99,18 @@ const deliverableMultipliers = {
   handoff: 0.05,
 };
 
+const scopeFactorMultipliers = {
+  discovery: 0.1,
+  legal: 0.06,
+  integration: 0.14,
+};
+
+const scopeFactorRisk = {
+  discovery: 0.8,
+  legal: 0.6,
+  integration: 1.1,
+};
+
 const timelineMultipliers = {
   calm: 1,
   normal: 1.08,
@@ -118,10 +130,23 @@ const stakeholderMultipliers = {
   large: 1.18,
 };
 
+const marginGoalMultipliers = {
+  growth: 0.94,
+  standard: 1,
+  premium: 1.14,
+};
+
 const budgetRiskAdjustments = {
   low: 2.3,
   medium: 1.1,
   high: 0.4,
+};
+
+const toneIntros = {
+  balanced: "This recommendation balances delivery confidence, scope protection, and close potential.",
+  warm: "This proposal keeps the collaboration clear, practical, and easy for your team to approve.",
+  firm: "This quote is structured to protect scope, decision speed, and delivery margin.",
+  concise: "Recommended quote, scope, and payment terms are summarized below for fast review.",
 };
 
 const toastStack = document.querySelector("#toastStack");
@@ -206,12 +231,27 @@ if (themeToggle) {
   });
 }
 
+function showShortcutHelp() {
+  showToast({
+    type: "info",
+    title: "Keyboard shortcuts",
+    message: "Cmd/Ctrl+Enter generates a quote. ? opens this help. Esc closes the mobile nav.",
+    duration: 5200,
+  });
+}
+
+const shortcutsHelpButton = document.querySelector("#shortcutsHelp");
+if (shortcutsHelpButton) {
+  shortcutsHelpButton.addEventListener("click", showShortcutHelp);
+}
+
 const scopeForm = document.querySelector("#scope-form");
 const proposalText = document.querySelector("#proposalText");
 const copyProposalButton = document.querySelector("#copyProposal");
 const copyProposalLabel = copyProposalButton?.querySelector(".ghost-button-label");
 const storageKey = "scopemint-mvp-state";
 const pricingStorageKey = "scopemint-pricing-state";
+const launchStorageKey = "scopemint-launch-checklist";
 const billingButtons = [...document.querySelectorAll("[data-billing]")];
 const planCards = [...document.querySelectorAll("[data-plan]")];
 const planButtons = [...document.querySelectorAll("[data-plan-select]")];
@@ -221,7 +261,11 @@ const checkoutMessage = document.querySelector("#checkoutMessage");
 const checkoutButton = document.querySelector("#checkoutButton");
 const copyCheckoutLinkButton = document.querySelector("#copyCheckoutLink");
 const riskMeterFill = document.querySelector("#riskMeterFill");
+const confidenceMeterFill = document.querySelector("#confidenceMeterFill");
+const autosaveStatus = document.querySelector("#autosaveStatus");
 const footerYear = document.querySelector("#footerYear");
+const launchChecklist = document.querySelector("#launchChecklist");
+const launchProgress = document.querySelector("#launchProgress");
 
 const pricingCatalog = {
   starter: {
@@ -242,7 +286,13 @@ const pricingCatalog = {
 };
 
 function getSelectedDeliverables() {
-  return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(
+  return [...document.querySelectorAll('.deliverable-fieldset input[type="checkbox"]:checked')].map(
+    (input) => input.value
+  );
+}
+
+function getSelectedScopeFactors() {
+  return [...document.querySelectorAll('.factor-fieldset input[type="checkbox"]:checked')].map(
     (input) => input.value
   );
 }
@@ -269,6 +319,10 @@ function buildGuardrails(input, riskScore) {
     items.push("Development estimates assume no major architecture pivots after approval.");
   }
 
+  if (input.scopeFactors.includes("legal")) {
+    items.push("Legal or procurement review should be time-boxed before production starts.");
+  }
+
   return items;
 }
 
@@ -293,6 +347,49 @@ function buildUpsells(input) {
   return upsells;
 }
 
+function buildRedFlags(input) {
+  const noteText = input.notes.toLowerCase();
+  const flags = [];
+  const keywordFlags = [
+    ["asap", "ASAP language usually means calendar risk; price rush windows explicitly."],
+    ["cheap", "Cheap/bargain framing is a margin warning; anchor on outcomes before price."],
+    ["urgent", "Urgent delivery needs fast approvals and a higher upfront payment."],
+    ["unlimited", "Unlimited scope language should be replaced with capped rounds and change orders."],
+    ["quick", "Quick-turn requests need clear assumptions and dependency dates."],
+  ];
+
+  for (const [keyword, message] of keywordFlags) {
+    if (noteText.includes(keyword)) flags.push(message);
+  }
+
+  if (input.scopeFactors.includes("integration")) {
+    flags.push("Integration work can hide unknown API and QA effort; add a technical discovery gate.");
+  }
+
+  if (input.scopeFactors.includes("discovery")) {
+    flags.push("Discovery is not complete; keep the quote range visible until requirements settle.");
+  }
+
+  return flags.length ? flags : ["No obvious red flags detected in the current inputs."];
+}
+
+function buildMilestones(input) {
+  const reviewWindow = input.timeline === "rush" ? "24-hour" : "2 business day";
+  const kickoff = input.scopeFactors.includes("discovery")
+    ? "Paid discovery and requirements lock"
+    : "Kickoff and source material handoff";
+  const production =
+    input.projectType === "retainer"
+      ? "Monthly sprint plan and first delivery batch"
+      : "Core production checkpoint with approved direction";
+  return [
+    kickoff,
+    `${titleize(input.projectType)} direction review with a ${reviewWindow} feedback window`,
+    production,
+    `Final revision round and launch handoff capped at ${input.revisions} round${input.revisions === "1" ? "" : "s"}`,
+  ];
+}
+
 function buildMarkdownProposal(input, prices, riskScore) {
   const deliverableList = input.deliverables.length
     ? input.deliverables.map((item) => `- ${titleize(item)}`).join("\n")
@@ -313,12 +410,17 @@ function buildMarkdownProposal(input, prices, riskScore) {
     `**Engagement type:** ${titleize(input.projectType)}  `,
     `**Recommended investment:** ${currency.format(prices.recommended)}  `,
     `**Floor / Stretch:** ${currency.format(prices.floor)} / ${currency.format(prices.stretch)}  `,
+    input.clientBudget > 0 ? `**Client budget:** ${currency.format(input.clientBudget)}  ` : "",
     `**Payment schedule:** ${prices.paymentPlan}  `,
+    "",
+    toneIntros[input.proposalTone] || toneIntros.balanced,
     "",
     "## Scope",
     `- Estimated effort: ${input.hours} hours at ${currency.format(input.rate)}/hr`,
+    `- Margin goal: ${titleize(input.marginGoal)}`,
     `- Revision rounds included: ${input.revisions}`,
     `- Stakeholder profile: ${input.stakeholders}`,
+    `- Scope risk factors: ${input.scopeFactors.length ? input.scopeFactors.map(titleize).join(", ") : "None flagged"}`,
     "",
     "### Included deliverables",
     deliverableList,
@@ -355,15 +457,22 @@ function buildProposal(input, prices, riskScore) {
   }
   headerLines.push(`Engagement type: ${titleize(input.projectType)}`);
   headerLines.push(`Recommended investment: ${currency.format(prices.recommended)}`);
+  if (input.clientBudget > 0) {
+    headerLines.push(`Client budget: ${currency.format(input.clientBudget)}`);
+  }
   headerLines.push(`Payment schedule: ${prices.paymentPlan}`);
 
   return `${headerLines.join("\n")}
 
 Scope
+${toneIntros[input.proposalTone] || toneIntros.balanced}
+
 - Estimated effort: ${input.hours} hours at a target internal rate of ${currency.format(input.rate)}/hr
+- Margin goal: ${titleize(input.marginGoal)}
 - Included deliverables: ${deliverableList}
 - Revision rounds included: ${input.revisions}
 - Stakeholder profile: ${input.stakeholders}
+- Scope risk factors: ${input.scopeFactors.length ? input.scopeFactors.map(titleize).join(", ") : "None flagged"}
 
 Commercial terms
 - ${rushLine}
@@ -376,10 +485,48 @@ Risk notes
 - Source notes: ${input.notes.trim() || "No additional client notes provided."}`;
 }
 
+function buildOneLineSummary(input, prices) {
+  const client = input.clientName || "Client";
+  const project = input.projectName || `${titleize(input.projectType)} engagement`;
+  return `${client} ${project}: recommend ${currency.format(prices.recommended)} (${currency.format(prices.floor)} floor / ${currency.format(prices.stretch)} stretch), ${prices.paymentPlan}, risk ${prices.riskScore}/10.`;
+}
+
 function renderList(selector, items) {
   const target = document.querySelector(selector);
   if (!target) return;
   target.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
+}
+
+function renderOrderedList(selector, items) {
+  const target = document.querySelector(selector);
+  if (!target) return;
+  target.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
+}
+
+function buildPaymentBreakdown(prices) {
+  if (prices.paymentPlan === "Monthly prepay") {
+    return [["Monthly prepay", prices.recommended]];
+  }
+  if (prices.paymentPlan.startsWith("60%")) {
+    return [
+      ["Deposit", prices.recommended * 0.6],
+      ["Midpoint", prices.recommended * 0.3],
+      ["Final", prices.recommended * 0.1],
+    ];
+  }
+  return [
+    ["Deposit", prices.recommended * 0.5],
+    ["Midpoint", prices.recommended * 0.3],
+    ["Final", prices.recommended * 0.2],
+  ];
+}
+
+function renderPaymentBreakdown(prices) {
+  const target = document.querySelector("#paymentBreakdown");
+  if (!target) return;
+  target.innerHTML = buildPaymentBreakdown(prices)
+    .map(([label, amount]) => `<li><span>${label}</span><strong>${currency.format(amount)}</strong></li>`)
+    .join("");
 }
 
 function formatPlanPrice(amount, billing) {
@@ -394,29 +541,45 @@ function computeQuote(input) {
       (sum, item) => sum + (deliverableMultipliers[item] || 0),
       0
     );
+  const factorBoost =
+    1 +
+    input.scopeFactors.reduce(
+      (sum, item) => sum + (scopeFactorMultipliers[item] || 0),
+      0
+    );
 
   const multiplier =
     projectMultipliers[input.projectType] *
     deliverableBoost *
+    factorBoost *
     timelineMultipliers[input.timeline] *
     revisionMultipliers[input.revisions] *
-    stakeholderMultipliers[input.stakeholders];
+    stakeholderMultipliers[input.stakeholders] *
+    (marginGoalMultipliers[input.marginGoal] || marginGoalMultipliers.standard);
 
   const recommended = Math.round(base * multiplier);
   const floor = Math.round(recommended * 0.82);
   const stretch = Math.round(recommended * 1.22);
+  const budgetGap = input.clientBudget > 0 ? input.clientBudget - recommended : null;
 
   let riskScore =
     budgetRiskAdjustments[input.budgetConfidence] +
     (input.timeline === "rush" ? 2.1 : input.timeline === "normal" ? 0.8 : 0.2) +
     (input.stakeholders === "large" ? 2.2 : input.stakeholders === "small" ? 1.2 : 0.4) +
-    (Number(input.revisions) >= 3 ? 1.7 : 0.5);
+    (Number(input.revisions) >= 3 ? 1.7 : 0.5) +
+    input.scopeFactors.reduce((sum, item) => sum + (scopeFactorRisk[item] || 0), 0);
 
   if (input.notes.toLowerCase().includes("asap")) riskScore += 1;
   if (input.notes.toLowerCase().includes("cheap")) riskScore += 1.4;
   if (input.notes.toLowerCase().includes("urgent")) riskScore += 0.8;
 
   riskScore = Math.min(10, Math.max(1, Number(riskScore.toFixed(1))));
+
+  const budgetConfidenceBonus = input.budgetConfidence === "high" ? 14 : input.budgetConfidence === "medium" ? 7 : 0;
+  const confidence = Math.max(
+    38,
+    Math.min(96, Math.round(92 - riskScore * 4 + budgetConfidenceBonus - input.scopeFactors.length * 4))
+  );
 
   const paymentPlan =
     riskScore >= 7
@@ -430,6 +593,8 @@ function computeQuote(input) {
     recommended,
     stretch,
     riskScore,
+    confidence,
+    budgetGap,
     paymentPlan,
   };
 }
@@ -444,6 +609,8 @@ function updateOutput(input) {
   animateCurrency(document.querySelector("#floorPrice"), prices.floor, currency);
   animateCurrency(document.querySelector("#recommendedPrice"), prices.recommended, currency, 640);
   animateCurrency(document.querySelector("#stretchPrice"), prices.stretch, currency);
+  animateCurrency(document.querySelector("#dockPrice"), prices.recommended, currency, 640);
+  animateNumber(document.querySelector("#dockRisk"), prices.riskScore, (v) => `${v}/10`, 720);
   animateNumber(
     document.querySelector("#riskScore"),
     prices.riskScore,
@@ -455,6 +622,16 @@ function updateOutput(input) {
     riskMeterFill.dataset.level =
       prices.riskScore >= 7 ? "high" : prices.riskScore >= 4 ? "medium" : "low";
   }
+  animateNumber(document.querySelector("#confidenceScore"), prices.confidence, (v) => `${v}%`, 720);
+  if (confidenceMeterFill) {
+    confidenceMeterFill.style.width = `${prices.confidence}%`;
+  }
+  document.querySelector("#confidenceSummary").textContent =
+    prices.confidence >= 80
+      ? "Strong signal quality. This quote is ready to share."
+      : prices.confidence >= 60
+        ? "Good starting point. Confirm assumptions before sending."
+        : "Needs more discovery before the number is client-safe.";
   document.querySelector("#riskSummary").textContent =
     prices.riskScore >= 7
       ? "High-friction deal. Protect margin and tighten scope."
@@ -466,9 +643,29 @@ function updateOutput(input) {
     prices.paymentPlan === "Monthly prepay"
       ? "Best for ongoing retainers with continuous scope."
       : "Front-load cash flow so the project starts safely.";
+  renderPaymentBreakdown(prices);
+  const budgetFitStatus = document.querySelector("#budgetFitStatus");
+  const budgetFitSummary = document.querySelector("#budgetFitSummary");
+  if (budgetFitStatus && budgetFitSummary) {
+    if (prices.budgetGap === null) {
+      budgetFitStatus.textContent = "No budget";
+      budgetFitSummary.textContent = "Add a client budget to see fit guidance.";
+    } else if (prices.budgetGap >= 0) {
+      budgetFitStatus.textContent = "Inside";
+      budgetFitSummary.textContent = `${currency.format(prices.budgetGap)} below the stated budget.`;
+    } else if (Math.abs(prices.budgetGap) <= prices.recommended * 0.15) {
+      budgetFitStatus.textContent = "Close";
+      budgetFitSummary.textContent = `${currency.format(Math.abs(prices.budgetGap))} above budget; explain scope value.`;
+    } else {
+      budgetFitStatus.textContent = "Above";
+      budgetFitSummary.textContent = `${currency.format(Math.abs(prices.budgetGap))} above budget; reduce scope or reset expectations.`;
+    }
+  }
 
   renderList("#guardrails", buildGuardrails(input, prices.riskScore));
   renderList("#upsells", buildUpsells(input));
+  renderList("#redFlags", buildRedFlags(input));
+  renderOrderedList("#milestones", buildMilestones(input));
 
   proposalText.textContent = buildProposal(input, prices, prices.riskScore);
   updatePricingRecommendation(input, prices);
@@ -480,13 +677,17 @@ function readForm() {
     projectName: document.querySelector("#projectName")?.value.trim() || "",
     projectType: document.querySelector("#projectType").value,
     budgetConfidence: document.querySelector("#budgetConfidence").value,
+    marginGoal: document.querySelector("#marginGoal")?.value || "standard",
     hours: Number(document.querySelector("#hours").value || 0),
     rate: Number(document.querySelector("#rate").value || 0),
+    clientBudget: Number(document.querySelector("#clientBudget")?.value || 0),
     currency: document.querySelector("#currency")?.value || "USD",
     timeline: document.querySelector("#timeline").value,
     revisions: document.querySelector("#revisions").value,
     stakeholders: document.querySelector("#stakeholders").value,
     deliverables: getSelectedDeliverables(),
+    scopeFactors: getSelectedScopeFactors(),
+    proposalTone: document.querySelector("#proposalTone")?.value || "balanced",
     notes: document.querySelector("#notes").value,
   };
 }
@@ -498,8 +699,12 @@ function writeForm(input) {
   if (projectNameField) projectNameField.value = input.projectName || "";
   document.querySelector("#projectType").value = input.projectType;
   document.querySelector("#budgetConfidence").value = input.budgetConfidence;
+  const marginGoalSelect = document.querySelector("#marginGoal");
+  if (marginGoalSelect) marginGoalSelect.value = input.marginGoal || "standard";
   document.querySelector("#hours").value = input.hours;
   document.querySelector("#rate").value = input.rate;
+  const clientBudgetField = document.querySelector("#clientBudget");
+  if (clientBudgetField) clientBudgetField.value = input.clientBudget || 0;
   const currencySelect = document.querySelector("#currency");
   if (currencySelect && input.currency) {
     currencySelect.value = input.currency;
@@ -507,15 +712,24 @@ function writeForm(input) {
   document.querySelector("#timeline").value = input.timeline;
   document.querySelector("#revisions").value = input.revisions;
   document.querySelector("#stakeholders").value = input.stakeholders;
+  const proposalToneSelect = document.querySelector("#proposalTone");
+  if (proposalToneSelect) proposalToneSelect.value = input.proposalTone || "balanced";
   document.querySelector("#notes").value = input.notes;
 
   for (const checkbox of document.querySelectorAll('input[type="checkbox"]')) {
-    checkbox.checked = input.deliverables.includes(checkbox.value);
+    const isDeliverable = checkbox.closest(".deliverable-fieldset");
+    const selectedValues = isDeliverable ? input.deliverables : input.scopeFactors || [];
+    checkbox.checked = selectedValues.includes(checkbox.value);
   }
 }
 
 function persistState(input) {
   localStorage.setItem(storageKey, JSON.stringify(input));
+}
+
+function setAutosaveStatus(message) {
+  if (!autosaveStatus) return;
+  autosaveStatus.textContent = message;
 }
 
 function persistPricingState(input) {
@@ -704,15 +918,120 @@ const defaultFormState = {
   projectName: "",
   projectType: "brand",
   budgetConfidence: "low",
+  marginGoal: "standard",
   hours: 40,
   rate: 90,
+  clientBudget: 0,
   currency: "USD",
   timeline: "normal",
   revisions: "2",
   stakeholders: "small",
   deliverables: ["strategy", "design", "handoff"],
+  scopeFactors: [],
+  proposalTone: "balanced",
   notes: "",
 };
+
+const quotePresets = {
+  "brand-sprint": {
+    projectType: "brand",
+    hours: 45,
+    rate: 110,
+    marginGoal: "premium",
+    timeline: "normal",
+    revisions: "2",
+    stakeholders: "small",
+    deliverables: ["strategy", "design", "handoff"],
+    scopeFactors: ["discovery"],
+    notes: "Brand sprint with positioning, identity system, and launch handoff.",
+  },
+  "web-launch": {
+    projectType: "web",
+    hours: 80,
+    rate: 125,
+    marginGoal: "standard",
+    timeline: "normal",
+    revisions: "3",
+    stakeholders: "small",
+    deliverables: ["strategy", "design", "copy", "dev", "analytics"],
+    scopeFactors: ["integration"],
+    notes: "Marketing website launch with copy, build, analytics, and QA.",
+  },
+  "mvp-build": {
+    projectType: "app",
+    hours: 160,
+    rate: 140,
+    marginGoal: "premium",
+    timeline: "rush",
+    revisions: "3",
+    stakeholders: "large",
+    deliverables: ["strategy", "design", "dev", "handoff"],
+    scopeFactors: ["discovery", "integration"],
+    notes: "MVP build with technical discovery, product design, and integrations.",
+  },
+  retainer: {
+    projectType: "retainer",
+    hours: 35,
+    rate: 120,
+    marginGoal: "standard",
+    timeline: "calm",
+    revisions: "2",
+    stakeholders: "solo",
+    deliverables: ["strategy", "design", "analytics"],
+    scopeFactors: [],
+    notes: "Monthly optimization retainer with reporting and delivery cadence.",
+  },
+};
+
+const demoQuote = {
+  ...defaultFormState,
+  clientName: "Acme Studio",
+  projectName: "Q3 Brand Refresh",
+  projectType: "brand",
+  budgetConfidence: "medium",
+  clientBudget: 7200,
+  hours: 52,
+  rate: 115,
+  marginGoal: "premium",
+  timeline: "normal",
+  revisions: "2",
+  stakeholders: "small",
+  deliverables: ["strategy", "design", "copy", "handoff"],
+  scopeFactors: ["discovery"],
+  proposalTone: "warm",
+  notes: "Client wants a quick repositioning sprint before launch, with clear handoff for their internal team.",
+};
+
+const loadDemoQuoteButton = document.querySelector("#loadDemoQuote");
+if (loadDemoQuoteButton) {
+  loadDemoQuoteButton.addEventListener("click", () => {
+    writeForm(demoQuote);
+    persistState(demoQuote);
+    updateOutput(readForm());
+    document.querySelector("#quote")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    showToast({
+      type: "success",
+      title: "Demo quote loaded",
+      message: "A sample client brief is ready to explore.",
+    });
+  });
+}
+
+for (const button of document.querySelectorAll("[data-preset]")) {
+  button.addEventListener("click", () => {
+    const preset = quotePresets[button.dataset.preset];
+    if (!preset) return;
+    const merged = { ...readForm(), ...preset };
+    writeForm(merged);
+    persistState(merged);
+    updateOutput(readForm());
+    showToast({
+      type: "success",
+      title: "Preset loaded",
+      message: `${button.textContent} details applied to the calculator.`,
+    });
+  });
+}
 
 scopeForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -721,8 +1040,33 @@ scopeForm.addEventListener("submit", (event) => {
   updateOutput(input);
 });
 
+let autosaveTimer = 0;
+scopeForm.addEventListener("input", () => {
+  window.clearTimeout(autosaveTimer);
+  setAutosaveStatus("Unsaved changes");
+  autosaveTimer = window.setTimeout(() => {
+    const input = readForm();
+    persistState(input);
+    updateOutput(input);
+    setAutosaveStatus("Autosaved");
+  }, 350);
+});
+
+scopeForm.addEventListener("change", () => {
+  const input = readForm();
+  persistState(input);
+  updateOutput(input);
+  setAutosaveStatus("Autosaved");
+});
+
 document.addEventListener("keydown", (event) => {
   const isSubmitCombo = (event.metaKey || event.ctrlKey) && event.key === "Enter";
+  const isTyping = ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName || "");
+  if (event.key === "?" && !isTyping) {
+    event.preventDefault();
+    showShortcutHelp();
+    return;
+  }
   if (isSubmitCombo) {
     event.preventDefault();
     const submitButton = scopeForm.querySelector(".submit-button");
@@ -795,6 +1139,25 @@ copyProposalButton.addEventListener("click", async () => {
 });
 
 const downloadProposalButton = document.querySelector("#downloadProposal");
+const copyOneLineButton = document.querySelector("#copyOneLine");
+if (copyOneLineButton) {
+  copyOneLineButton.addEventListener("click", async () => {
+    const input = readForm();
+    const prices = computeQuote(input);
+    const summary = buildOneLineSummary(input, prices);
+    try {
+      await navigator.clipboard.writeText(summary);
+      showToast({
+        type: "success",
+        title: "One-line summary copied",
+        message: "Ready for Slack, email, or CRM notes.",
+      });
+    } catch {
+      window.prompt("Copy this one-line summary:", summary);
+    }
+  });
+}
+
 if (downloadProposalButton) {
   downloadProposalButton.addEventListener("click", () => {
     const input = readForm();
@@ -901,6 +1264,8 @@ const historyEmptyEl = document.querySelector("#historyEmpty");
 const historyCountEl = document.querySelector("#historyCount");
 const saveQuoteButton = document.querySelector("#saveQuote");
 const clearHistoryButton = document.querySelector("#clearHistory");
+const exportHistoryButton = document.querySelector("#exportHistory");
+const historySearchInput = document.querySelector("#historySearch");
 
 function loadHistory() {
   try {
@@ -913,7 +1278,11 @@ function loadHistory() {
 }
 
 function saveHistory(entries) {
-  localStorage.setItem(historyStorageKey, JSON.stringify(entries.slice(0, 25)));
+  const sorted = [...entries].sort((a, b) => {
+    if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
+    return new Date(b.savedAt) - new Date(a.savedAt);
+  });
+  localStorage.setItem(historyStorageKey, JSON.stringify(sorted.slice(0, 25)));
 }
 
 function escapeHtml(str) {
@@ -951,33 +1320,67 @@ function summarizeEntry(entry) {
 function renderHistory() {
   if (!historyListEl) return;
   const entries = loadHistory();
+  const query = historySearchInput?.value.trim().toLowerCase() || "";
+  const visibleEntries = query
+    ? entries.filter((entry) => {
+        const haystack = [
+          entry.input.clientName,
+          entry.input.projectName,
+          projectTypeLabels[entry.input.projectType],
+          entry.input.notes,
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(query);
+      })
+    : entries;
   historyListEl.innerHTML = "";
 
   if (historyCountEl) {
-    historyCountEl.textContent = `${entries.length} saved`;
+    historyCountEl.textContent = query
+      ? `${visibleEntries.length}/${entries.length} shown`
+      : `${entries.length} saved`;
   }
 
   if (entries.length === 0) {
     historyListEl.classList.add("is-hidden");
     historyEmptyEl?.classList.remove("is-hidden");
+    if (historyEmptyEl) {
+      historyEmptyEl.textContent = "Save quotes from the proposal panel above to build a personal pipeline log.";
+    }
     clearHistoryButton?.classList.add("is-hidden");
+    exportHistoryButton?.classList.add("is-hidden");
+    return;
+  }
+
+  if (visibleEntries.length === 0) {
+    historyListEl.classList.add("is-hidden");
+    historyEmptyEl?.classList.remove("is-hidden");
+    if (historyEmptyEl) {
+      historyEmptyEl.textContent = "No saved quotes match that search.";
+    }
+    clearHistoryButton?.classList.remove("is-hidden");
+    exportHistoryButton?.classList.remove("is-hidden");
     return;
   }
 
   historyListEl.classList.remove("is-hidden");
   historyEmptyEl?.classList.add("is-hidden");
   clearHistoryButton?.classList.remove("is-hidden");
+  exportHistoryButton?.classList.remove("is-hidden");
 
-  for (const entry of entries) {
+  for (const entry of visibleEntries) {
     const summary = summarizeEntry(entry);
     const li = document.createElement("li");
     li.className = "history-item";
+    li.classList.toggle("is-pinned", Boolean(entry.pinned));
     li.dataset.id = entry.id;
     li.innerHTML = `
       <div class="history-info">
         <p class="history-title">${escapeHtml(summary.title)}</p>
         <div class="history-meta-row">
           <span class="history-tag">${escapeHtml(summary.typeTag)}</span>
+          ${entry.pinned ? '<span class="history-tag is-pinned">Pinned</span>' : ""}
           <span class="history-price">${escapeHtml(summary.price)}</span>
           <span class="history-risk">
             <span class="history-risk-dot" data-level="${escapeHtml(summary.riskLevel)}"></span>
@@ -987,6 +1390,9 @@ function renderHistory() {
         </div>
       </div>
       <div class="history-actions">
+        <button class="icon-button" data-action="pin" type="button" title="Pin quote" aria-label="Pin quote">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M14 4l6 6-3 1-4 4 1 5-2 2-4-6-6-4 2-2 5 1 4-4 1-3z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
         <button class="icon-button" data-action="restore" type="button" title="Restore quote" aria-label="Restore quote">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -1005,6 +1411,7 @@ function restoreHistoryEntry(id) {
   if (!entry) return;
   const merged = { ...defaultFormState, ...entry.input };
   if (!Array.isArray(merged.deliverables)) merged.deliverables = [];
+  if (!Array.isArray(merged.scopeFactors)) merged.scopeFactors = [];
   writeForm(merged);
   activeCurrency = merged.currency || "USD";
   currency = buildCurrencyFormatter(activeCurrency);
@@ -1038,7 +1445,16 @@ if (historyListEl) {
     const id = item.dataset.id;
     if (button.dataset.action === "restore") restoreHistoryEntry(id);
     if (button.dataset.action === "delete") deleteHistoryEntry(id);
+    if (button.dataset.action === "pin") toggleHistoryPin(id);
   });
+}
+
+function toggleHistoryPin(id) {
+  const entries = loadHistory().map((item) =>
+    item.id === id ? { ...item, pinned: !item.pinned } : item
+  );
+  saveHistory(entries);
+  renderHistory();
 }
 
 if (saveQuoteButton) {
@@ -1048,6 +1464,7 @@ if (saveQuoteButton) {
     const entry = {
       id: `q_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
       savedAt: new Date().toISOString(),
+      pinned: false,
       input,
       prices,
     };
@@ -1075,6 +1492,48 @@ if (clearHistoryButton) {
   });
 }
 
+if (historySearchInput) {
+  historySearchInput.addEventListener("input", renderHistory);
+}
+
+function csvEscape(value) {
+  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+}
+
+if (exportHistoryButton) {
+  exportHistoryButton.addEventListener("click", () => {
+    const entries = loadHistory();
+    if (!entries.length) return;
+    const rows = [
+      ["Saved at", "Client", "Project", "Type", "Recommended", "Risk", "Currency"],
+      ...entries.map((entry) => [
+        entry.savedAt,
+        entry.input.clientName || "",
+        entry.input.projectName || "",
+        projectTypeLabels[entry.input.projectType] || entry.input.projectType,
+        entry.prices.recommended,
+        entry.prices.riskScore,
+        entry.input.currency || "USD",
+      ]),
+    ];
+    const csv = rows.map((row) => row.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "scopemint-quote-history.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast({
+      type: "success",
+      title: "History exported",
+      message: "CSV download created from saved quotes.",
+    });
+  });
+}
+
 renderHistory();
 
 function applyHashStateIfPresent() {
@@ -1085,6 +1544,7 @@ function applyHashStateIfPresent() {
   if (!decoded || typeof decoded !== "object") return false;
   const merged = { ...defaultFormState, ...decoded };
   if (!Array.isArray(merged.deliverables)) merged.deliverables = [];
+  if (!Array.isArray(merged.scopeFactors)) merged.scopeFactors = [];
   writeForm(merged);
   activeCurrency = merged.currency || "USD";
   currency = buildCurrencyFormatter(activeCurrency);
@@ -1130,6 +1590,7 @@ const savedState = loadState();
 if (savedState) {
   if (!savedState.currency) savedState.currency = "USD";
   if (!Array.isArray(savedState.deliverables)) savedState.deliverables = [];
+  if (!Array.isArray(savedState.scopeFactors)) savedState.scopeFactors = [];
   writeForm(savedState);
   activeCurrency = savedState.currency;
   currency = buildCurrencyFormatter(activeCurrency);
@@ -1155,6 +1616,35 @@ window.addEventListener("hashchange", () => {
 
 if (footerYear) {
   footerYear.textContent = new Date().getFullYear();
+}
+
+function loadLaunchChecklist() {
+  try {
+    return JSON.parse(localStorage.getItem(launchStorageKey) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function updateLaunchProgress() {
+  if (!launchChecklist || !launchProgress) return;
+  const boxes = [...launchChecklist.querySelectorAll('input[type="checkbox"]')];
+  const checked = boxes.filter((box) => box.checked).length;
+  const percent = boxes.length ? Math.round((checked / boxes.length) * 100) : 0;
+  launchProgress.textContent = `${percent}%`;
+  localStorage.setItem(
+    launchStorageKey,
+    JSON.stringify(boxes.filter((box) => box.checked).map((box) => box.value))
+  );
+}
+
+if (launchChecklist) {
+  const checkedValues = loadLaunchChecklist();
+  for (const box of launchChecklist.querySelectorAll('input[type="checkbox"]')) {
+    box.checked = checkedValues.includes(box.value);
+  }
+  launchChecklist.addEventListener("change", updateLaunchProgress);
+  updateLaunchProgress();
 }
 
 (function setupMobileNav() {

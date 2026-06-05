@@ -62,6 +62,7 @@
             <a class="nav-link" href="#quote">Quote tool</a>
             <a class="nav-link" href="#history">History</a>
             <a class="nav-link" href="#pricing">Pricing</a>
+            <a class="nav-link" href="#launch">Launch</a>
           </div>
           <div class="nav-actions">
             <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false" title="Toggle theme">
@@ -72,6 +73,9 @@
               <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M21 14.5A8.5 8.5 0 0 1 9.5 3a7.5 7.5 0 1 0 11.5 11.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
               </svg>
+            </button>
+            <button id="shortcutsHelp" class="theme-toggle" type="button" aria-label="Show keyboard shortcuts" title="Keyboard shortcuts">
+              ?
             </button>
             <a class="primary-button compact" href="#quote">
               Try it free
@@ -109,6 +113,7 @@
                 </svg>
               </a>
               <a class="ghost-button" href="#pricing">See pricing</a>
+              <button class="ghost-button" id="loadDemoQuote" type="button">Load demo quote</button>
             </div>
             <div class="hero-points">
               <span>
@@ -180,12 +185,35 @@
           </aside>
         </section>
 
+        <section class="proof-strip" aria-label="ScopeMint outcome highlights">
+          <article>
+            <span class="proof-value">60 sec</span>
+            <span class="proof-label">average quote build</span>
+          </article>
+          <article>
+            <span class="proof-value">3 bands</span>
+            <span class="proof-label">floor, recommended, stretch</span>
+          </article>
+          <article>
+            <span class="proof-value">7 checks</span>
+            <span class="proof-label">scope and payment safeguards</span>
+          </article>
+        </section>
+
         <section class="workspace" id="quote">
           <form class="panel form-panel" id="scope-form">
             <div class="section-heading">
               <p class="eyebrow">Input</p>
               <h3>Project details</h3>
               <p class="section-sub">Tell us the shape of the work &mdash; we'll do the math.</p>
+              <p id="autosaveStatus" class="autosave-status">Autosave ready</p>
+            </div>
+
+            <div class="preset-row" aria-label="Project presets">
+              <button class="preset-chip" type="button" data-preset="brand-sprint">Brand sprint</button>
+              <button class="preset-chip" type="button" data-preset="web-launch">Website launch</button>
+              <button class="preset-chip" type="button" data-preset="mvp-build">MVP build</button>
+              <button class="preset-chip" type="button" data-preset="retainer">Retainer</button>
             </div>
 
             <div class="grid two-up">
@@ -200,7 +228,7 @@
               </label>
             </div>
 
-            <div class="grid two-up">
+            <div class="grid three-up">
               <label>
                 <span>Project type</span>
                 <select id="projectType">
@@ -219,9 +247,18 @@
                   <option value="high">Budget is defined</option>
                 </select>
               </label>
+
+              <label>
+                <span>Margin goal</span>
+                <select id="marginGoal">
+                  <option value="standard" selected>Standard margin</option>
+                  <option value="growth">Growth-friendly</option>
+                  <option value="premium">Premium margin</option>
+                </select>
+              </label>
             </div>
 
-            <div class="grid three-up">
+            <div class="grid four-up">
               <label>
                 <span>Estimated hours</span>
                 <div class="input-wrap">
@@ -248,6 +285,14 @@
                   <option value="CAD">CAD ($)</option>
                   <option value="AUD">AUD ($)</option>
                 </select>
+              </label>
+
+              <label>
+                <span>Client budget</span>
+                <div class="input-wrap">
+                  <span class="input-prefix" aria-hidden="true">$</span>
+                  <input id="clientBudget" type="number" min="0" value="0" placeholder="Optional" />
+                </div>
               </label>
             </div>
 
@@ -281,7 +326,7 @@
               </label>
             </div>
 
-            <fieldset class="chip-fieldset">
+            <fieldset class="chip-fieldset deliverable-fieldset">
               <legend>Deliverables</legend>
               <label class="chip">
                 <input type="checkbox" value="strategy" checked />
@@ -328,6 +373,22 @@
               </label>
             </fieldset>
 
+            <fieldset class="chip-fieldset factor-fieldset">
+              <legend>Scope risk factors</legend>
+              <label class="chip">
+                <input type="checkbox" value="discovery" />
+                <span>Discovery needed</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" value="legal" />
+                <span>Legal review</span>
+              </label>
+              <label class="chip">
+                <input type="checkbox" value="integration" />
+                <span>3rd-party integration</span>
+              </label>
+            </fieldset>
+
             <label>
               <span>Client notes</span>
               <textarea
@@ -335,6 +396,16 @@
                 rows="5"
                 placeholder="Paste the messy client brief, goals, or red flags here."
               ></textarea>
+            </label>
+
+            <label>
+              <span>Proposal tone</span>
+              <select id="proposalTone">
+                <option value="balanced" selected>Balanced</option>
+                <option value="warm">Warm and collaborative</option>
+                <option value="firm">Firm scope control</option>
+                <option value="concise">Concise executive summary</option>
+              </select>
             </label>
 
             <div class="form-actions">
@@ -377,7 +448,7 @@
               </div>
             </div>
 
-            <div class="grid two-up metrics">
+            <div class="grid four-up metrics">
               <article>
                 <span class="metric-label">Risk score</span>
                 <strong id="riskScore">0/10</strong>
@@ -390,10 +461,24 @@
                 <span class="metric-label">Payment structure</span>
                 <strong id="paymentPlan">50 / 30 / 20</strong>
                 <p id="paymentSummary"></p>
+                <ul id="paymentBreakdown" class="payment-breakdown"></ul>
+              </article>
+              <article>
+                <span class="metric-label">Quote confidence</span>
+                <strong id="confidenceScore">0%</strong>
+                <div class="confidence-meter" aria-hidden="true">
+                  <span id="confidenceMeterFill"></span>
+                </div>
+                <p id="confidenceSummary"></p>
+              </article>
+              <article>
+                <span class="metric-label">Budget fit</span>
+                <strong id="budgetFitStatus">No budget</strong>
+                <p id="budgetFitSummary"></p>
               </article>
             </div>
 
-            <div class="grid two-up callouts">
+            <div class="grid three-up callouts">
               <article>
                 <h4>
                   <span class="callout-icon" aria-hidden="true">
@@ -416,7 +501,27 @@
                 </h4>
                 <ul id="upsells" class="check-list"></ul>
               </article>
+              <article>
+                <h4>
+                  <span class="callout-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M12 3l9 16H3L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                      <path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                  Red flags
+                </h4>
+                <ul id="redFlags" class="check-list"></ul>
+              </article>
             </div>
+
+            <article class="timeline-plan">
+              <div>
+                <p class="card-label">Delivery map</p>
+                <h4>Suggested milestones</h4>
+              </div>
+              <ol id="milestones" class="milestone-list"></ol>
+            </article>
 
             <article class="proposal-box">
               <div class="proposal-head">
@@ -431,6 +536,12 @@
                       <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                     </svg>
                     <span class="ghost-button-label">Copy text</span>
+                  </button>
+                  <button id="copyOneLine" class="ghost-button" type="button" title="Copy a one-line quote summary">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M4 7h16M4 12h10M4 17h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    Copy one-line
                   </button>
                   <button id="downloadProposal" class="ghost-button" type="button" title="Download proposal as Markdown">
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -474,7 +585,11 @@
               <p class="section-sub">Quickly reload past quotes to remix or compare.</p>
             </div>
             <div class="history-meta">
+              <input id="historySearch" class="history-search" type="search" placeholder="Search saved quotes" aria-label="Search saved quotes" />
               <span id="historyCount" class="history-count">0 saved</span>
+              <button id="exportHistory" class="ghost-button" type="button">
+                Export CSV
+              </button>
               <button id="clearHistory" class="ghost-button" type="button">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M5 7h14M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M7 7l1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -638,6 +753,26 @@
             </div>
           </div>
         </section>
+
+        <section class="panel launch-panel" id="launch">
+          <div class="launch-head">
+            <div class="section-heading">
+              <p class="eyebrow">Launch workflow</p>
+              <h3>Quote-to-cash checklist</h3>
+              <p class="section-sub">Track the next steps that turn a generated quote into a paid project.</p>
+            </div>
+            <div class="launch-progress">
+              <strong id="launchProgress">0%</strong>
+              <span>complete</span>
+            </div>
+          </div>
+          <div class="launch-checklist" id="launchChecklist">
+            <label><input type="checkbox" value="demo" /> Demo the quote with the client</label>
+            <label><input type="checkbox" value="scope" /> Confirm scope guardrails in writing</label>
+            <label><input type="checkbox" value="deposit" /> Send deposit invoice or checkout link</label>
+            <label><input type="checkbox" value="kickoff" /> Schedule kickoff after payment</label>
+          </div>
+        </section>
       </main>
 
       <footer class="site-footer">
@@ -658,6 +793,12 @@
     </div>
 
     <div id="toastStack" class="toast-stack" role="status" aria-live="polite"></div>
+
+    <aside class="quote-dock" aria-label="Current quote summary">
+      <span>Recommended <strong id="dockPrice">$0</strong></span>
+      <span>Risk <strong id="dockRisk">0/10</strong></span>
+      <a href="#quote">Edit quote</a>
+    </aside>
 
     <button
       id="backToTop"
