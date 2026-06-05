@@ -251,6 +251,7 @@ const copyProposalButton = document.querySelector("#copyProposal");
 const copyProposalLabel = copyProposalButton?.querySelector(".ghost-button-label");
 const storageKey = "scopemint-mvp-state";
 const pricingStorageKey = "scopemint-pricing-state";
+const launchStorageKey = "scopemint-launch-checklist";
 const billingButtons = [...document.querySelectorAll("[data-billing]")];
 const planCards = [...document.querySelectorAll("[data-plan]")];
 const planButtons = [...document.querySelectorAll("[data-plan-select]")];
@@ -263,6 +264,8 @@ const riskMeterFill = document.querySelector("#riskMeterFill");
 const confidenceMeterFill = document.querySelector("#confidenceMeterFill");
 const autosaveStatus = document.querySelector("#autosaveStatus");
 const footerYear = document.querySelector("#footerYear");
+const launchChecklist = document.querySelector("#launchChecklist");
+const launchProgress = document.querySelector("#launchProgress");
 
 const pricingCatalog = {
   starter: {
@@ -1613,6 +1616,35 @@ window.addEventListener("hashchange", () => {
 
 if (footerYear) {
   footerYear.textContent = new Date().getFullYear();
+}
+
+function loadLaunchChecklist() {
+  try {
+    return JSON.parse(localStorage.getItem(launchStorageKey) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function updateLaunchProgress() {
+  if (!launchChecklist || !launchProgress) return;
+  const boxes = [...launchChecklist.querySelectorAll('input[type="checkbox"]')];
+  const checked = boxes.filter((box) => box.checked).length;
+  const percent = boxes.length ? Math.round((checked / boxes.length) * 100) : 0;
+  launchProgress.textContent = `${percent}%`;
+  localStorage.setItem(
+    launchStorageKey,
+    JSON.stringify(boxes.filter((box) => box.checked).map((box) => box.value))
+  );
+}
+
+if (launchChecklist) {
+  const checkedValues = loadLaunchChecklist();
+  for (const box of launchChecklist.querySelectorAll('input[type="checkbox"]')) {
+    box.checked = checkedValues.includes(box.value);
+  }
+  launchChecklist.addEventListener("change", updateLaunchProgress);
+  updateLaunchProgress();
 }
 
 (function setupMobileNav() {

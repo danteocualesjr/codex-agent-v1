@@ -113,7 +113,8 @@ html {
 main#top,
 #quote,
 #history,
-#pricing {
+#pricing,
+#launch {
   scroll-margin-top: 96px;
 }
 
@@ -212,7 +213,9 @@ body::before {
 .checkout-form,
 .checkout-actions,
 .billing-toggle,
-.topbar-nav {
+.topbar-nav,
+.launch-head,
+.launch-checklist {
   display: grid;
   gap: 16px;
 }
@@ -1998,6 +2001,72 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   line-height: 1.55;
 }
 
+/* ---------- launch checklist ---------- */
+.launch-panel {
+  padding: 30px;
+  margin-top: 28px;
+}
+
+.launch-head {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.launch-progress {
+  min-width: 120px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--brand-soft);
+  text-align: center;
+}
+
+.launch-progress strong,
+.launch-progress span {
+  display: block;
+}
+
+.launch-progress strong {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 2rem;
+  color: var(--brand-dark);
+}
+
+.launch-progress span {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.launch-checklist {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.launch-checklist label {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--panel-soft);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.launch-checklist input {
+  width: auto;
+  margin-right: 8px;
+  accent-color: var(--brand);
+}
+
+.launch-checklist label:has(input:checked) {
+  border-color: rgba(13, 110, 102, 0.38);
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+}
+
 /* ---------- footer ---------- */
 .site-footer {
   margin-top: 36px;
@@ -2518,6 +2587,7 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   .hero-points,
   .grid.three-up,
   .grid.four-up,
+  .launch-head,
   .checkout-form,
   .pricing-header {
     grid-template-columns: 1fr;
@@ -2535,6 +2605,10 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
 
   .price-strip {
     grid-template-columns: 1fr;
+  }
+
+  .launch-checklist {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .hero {
@@ -2654,6 +2728,7 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   .checkout-actions,
   .proposal-head,
   .chip-fieldset,
+  .launch-checklist,
   .hero-actions {
     grid-template-columns: 1fr;
   }
