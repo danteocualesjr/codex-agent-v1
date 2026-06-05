@@ -247,6 +247,7 @@ const checkoutButton = document.querySelector("#checkoutButton");
 const copyCheckoutLinkButton = document.querySelector("#copyCheckoutLink");
 const riskMeterFill = document.querySelector("#riskMeterFill");
 const confidenceMeterFill = document.querySelector("#confidenceMeterFill");
+const autosaveStatus = document.querySelector("#autosaveStatus");
 const footerYear = document.querySelector("#footerYear");
 
 const pricingCatalog = {
@@ -709,6 +710,11 @@ function persistState(input) {
   localStorage.setItem(storageKey, JSON.stringify(input));
 }
 
+function setAutosaveStatus(message) {
+  if (!autosaveStatus) return;
+  autosaveStatus.textContent = message;
+}
+
 function persistPricingState(input) {
   localStorage.setItem(pricingStorageKey, JSON.stringify(input));
 }
@@ -1015,6 +1021,25 @@ scopeForm.addEventListener("submit", (event) => {
   const input = readForm();
   persistState(input);
   updateOutput(input);
+});
+
+let autosaveTimer = 0;
+scopeForm.addEventListener("input", () => {
+  window.clearTimeout(autosaveTimer);
+  setAutosaveStatus("Unsaved changes");
+  autosaveTimer = window.setTimeout(() => {
+    const input = readForm();
+    persistState(input);
+    updateOutput(input);
+    setAutosaveStatus("Autosaved");
+  }, 350);
+});
+
+scopeForm.addEventListener("change", () => {
+  const input = readForm();
+  persistState(input);
+  updateOutput(input);
+  setAutosaveStatus("Autosaved");
 });
 
 document.addEventListener("keydown", (event) => {

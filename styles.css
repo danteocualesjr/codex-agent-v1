@@ -928,6 +928,20 @@ body::before {
   font-size: 0.95rem;
 }
 
+.autosave-status {
+  margin: 10px 0 0;
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .grid.two-up {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
