@@ -1510,6 +1510,57 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   gap: 10px;
 }
 
+.timeline-plan {
+  margin: 18px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(520px 220px at 100% 0%, rgba(13, 110, 102, 0.08), transparent 60%),
+    rgba(255, 252, 247, 0.85);
+}
+
+.timeline-plan h4 {
+  margin: 4px 0 14px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.2rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.milestone-list {
+  counter-reset: milestone;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.milestone-list li {
+  counter-increment: milestone;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.milestone-list li::before {
+  content: counter(milestone);
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
 .callout-icon {
   display: inline-grid;
   place-items: center;

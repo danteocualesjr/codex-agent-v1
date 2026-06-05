@@ -348,6 +348,23 @@ function buildRedFlags(input) {
   return flags.length ? flags : ["No obvious red flags detected in the current inputs."];
 }
 
+function buildMilestones(input) {
+  const reviewWindow = input.timeline === "rush" ? "24-hour" : "2 business day";
+  const kickoff = input.scopeFactors.includes("discovery")
+    ? "Paid discovery and requirements lock"
+    : "Kickoff and source material handoff";
+  const production =
+    input.projectType === "retainer"
+      ? "Monthly sprint plan and first delivery batch"
+      : "Core production checkpoint with approved direction";
+  return [
+    kickoff,
+    `${titleize(input.projectType)} direction review with a ${reviewWindow} feedback window`,
+    production,
+    `Final revision round and launch handoff capped at ${input.revisions} round${input.revisions === "1" ? "" : "s"}`,
+  ];
+}
+
 function buildMarkdownProposal(input, prices, riskScore) {
   const deliverableList = input.deliverables.length
     ? input.deliverables.map((item) => `- ${titleize(item)}`).join("\n")
@@ -440,6 +457,12 @@ Risk notes
 }
 
 function renderList(selector, items) {
+  const target = document.querySelector(selector);
+  if (!target) return;
+  target.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
+}
+
+function renderOrderedList(selector, items) {
   const target = document.querySelector(selector);
   if (!target) return;
   target.innerHTML = items.map((item) => `<li>${item}</li>`).join("");
@@ -578,6 +601,7 @@ function updateOutput(input) {
   renderList("#guardrails", buildGuardrails(input, prices.riskScore));
   renderList("#upsells", buildUpsells(input));
   renderList("#redFlags", buildRedFlags(input));
+  renderOrderedList("#milestones", buildMilestones(input));
 
   proposalText.textContent = buildProposal(input, prices, prices.riskScore);
   updatePricingRecommendation(input, prices);
