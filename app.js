@@ -467,6 +467,12 @@ Risk notes
 - Source notes: ${input.notes.trim() || "No additional client notes provided."}`;
 }
 
+function buildOneLineSummary(input, prices) {
+  const client = input.clientName || "Client";
+  const project = input.projectName || `${titleize(input.projectType)} engagement`;
+  return `${client} ${project}: recommend ${currency.format(prices.recommended)} (${currency.format(prices.floor)} floor / ${currency.format(prices.stretch)} stretch), ${prices.paymentPlan}, risk ${prices.riskScore}/10.`;
+}
+
 function renderList(selector, items) {
   const target = document.querySelector(selector);
   if (!target) return;
@@ -1083,6 +1089,25 @@ copyProposalButton.addEventListener("click", async () => {
 });
 
 const downloadProposalButton = document.querySelector("#downloadProposal");
+const copyOneLineButton = document.querySelector("#copyOneLine");
+if (copyOneLineButton) {
+  copyOneLineButton.addEventListener("click", async () => {
+    const input = readForm();
+    const prices = computeQuote(input);
+    const summary = buildOneLineSummary(input, prices);
+    try {
+      await navigator.clipboard.writeText(summary);
+      showToast({
+        type: "success",
+        title: "One-line summary copied",
+        message: "Ready for Slack, email, or CRM notes.",
+      });
+    } catch {
+      window.prompt("Copy this one-line summary:", summary);
+    }
+  });
+}
+
 if (downloadProposalButton) {
   downloadProposalButton.addEventListener("click", () => {
     const input = readForm();
