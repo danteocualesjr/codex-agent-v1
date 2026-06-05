@@ -99,6 +99,18 @@ const deliverableMultipliers = {
   handoff: 0.05,
 };
 
+const scopeFactorMultipliers = {
+  discovery: 0.1,
+  legal: 0.06,
+  integration: 0.14,
+};
+
+const scopeFactorRisk = {
+  discovery: 0.8,
+  legal: 0.6,
+  integration: 1.1,
+};
+
 const timelineMultipliers = {
   calm: 1,
   normal: 1.08,
@@ -248,7 +260,13 @@ const pricingCatalog = {
 };
 
 function getSelectedDeliverables() {
-  return [...document.querySelectorAll('input[type="checkbox"]:checked')].map(
+  return [...document.querySelectorAll('.deliverable-fieldset input[type="checkbox"]:checked')].map(
+    (input) => input.value
+  );
+}
+
+function getSelectedScopeFactors() {
+  return [...document.querySelectorAll('.factor-fieldset input[type="checkbox"]:checked')].map(
     (input) => input.value
   );
 }
@@ -273,6 +291,10 @@ function buildGuardrails(input, riskScore) {
 
   if (input.deliverables.includes("dev")) {
     items.push("Development estimates assume no major architecture pivots after approval.");
+  }
+
+  if (input.scopeFactors.includes("legal")) {
+    items.push("Legal or procurement review should be time-boxed before production starts.");
   }
 
   return items;
@@ -327,6 +349,7 @@ function buildMarkdownProposal(input, prices, riskScore) {
     `- Margin goal: ${titleize(input.marginGoal)}`,
     `- Revision rounds included: ${input.revisions}`,
     `- Stakeholder profile: ${input.stakeholders}`,
+    `- Scope risk factors: ${input.scopeFactors.length ? input.scopeFactors.map(titleize).join(", ") : "None flagged"}`,
     "",
     "### Included deliverables",
     deliverableList,
@@ -376,6 +399,7 @@ Scope
 - Included deliverables: ${deliverableList}
 - Revision rounds included: ${input.revisions}
 - Stakeholder profile: ${input.stakeholders}
+- Scope risk factors: ${input.scopeFactors.length ? input.scopeFactors.map(titleize).join(", ") : "None flagged"}
 
 Commercial terms
 - ${rushLine}
@@ -406,10 +430,17 @@ function computeQuote(input) {
       (sum, item) => sum + (deliverableMultipliers[item] || 0),
       0
     );
+  const factorBoost =
+    1 +
+    input.scopeFactors.reduce(
+      (sum, item) => sum + (scopeFactorMultipliers[item] || 0),
+      0
+    );
 
   const multiplier =
     projectMultipliers[input.projectType] *
     deliverableBoost *
+    factorBoost *
     timelineMultipliers[input.timeline] *
     revisionMultipliers[input.revisions] *
     stakeholderMultipliers[input.stakeholders] *
@@ -423,7 +454,8 @@ function computeQuote(input) {
     budgetRiskAdjustments[input.budgetConfidence] +
     (input.timeline === "rush" ? 2.1 : input.timeline === "normal" ? 0.8 : 0.2) +
     (input.stakeholders === "large" ? 2.2 : input.stakeholders === "small" ? 1.2 : 0.4) +
-    (Number(input.revisions) >= 3 ? 1.7 : 0.5);
+    (Number(input.revisions) >= 3 ? 1.7 : 0.5) +
+    input.scopeFactors.reduce((sum, item) => sum + (scopeFactorRisk[item] || 0), 0);
 
   if (input.notes.toLowerCase().includes("asap")) riskScore += 1;
   if (input.notes.toLowerCase().includes("cheap")) riskScore += 1.4;
@@ -502,6 +534,7 @@ function readForm() {
     revisions: document.querySelector("#revisions").value,
     stakeholders: document.querySelector("#stakeholders").value,
     deliverables: getSelectedDeliverables(),
+    scopeFactors: getSelectedScopeFactors(),
     notes: document.querySelector("#notes").value,
   };
 }
@@ -529,7 +562,9 @@ function writeForm(input) {
   document.querySelector("#notes").value = input.notes;
 
   for (const checkbox of document.querySelectorAll('input[type="checkbox"]')) {
-    checkbox.checked = input.deliverables.includes(checkbox.value);
+    const isDeliverable = checkbox.closest(".deliverable-fieldset");
+    const selectedValues = isDeliverable ? input.deliverables : input.scopeFactors || [];
+    checkbox.checked = selectedValues.includes(checkbox.value);
   }
 }
 
@@ -732,6 +767,7 @@ const defaultFormState = {
   revisions: "2",
   stakeholders: "small",
   deliverables: ["strategy", "design", "handoff"],
+  scopeFactors: [],
   notes: "",
 };
 
@@ -1026,6 +1062,7 @@ function restoreHistoryEntry(id) {
   if (!entry) return;
   const merged = { ...defaultFormState, ...entry.input };
   if (!Array.isArray(merged.deliverables)) merged.deliverables = [];
+  if (!Array.isArray(merged.scopeFactors)) merged.scopeFactors = [];
   writeForm(merged);
   activeCurrency = merged.currency || "USD";
   currency = buildCurrencyFormatter(activeCurrency);
@@ -1106,6 +1143,7 @@ function applyHashStateIfPresent() {
   if (!decoded || typeof decoded !== "object") return false;
   const merged = { ...defaultFormState, ...decoded };
   if (!Array.isArray(merged.deliverables)) merged.deliverables = [];
+  if (!Array.isArray(merged.scopeFactors)) merged.scopeFactors = [];
   writeForm(merged);
   activeCurrency = merged.currency || "USD";
   currency = buildCurrencyFormatter(activeCurrency);
@@ -1151,6 +1189,7 @@ const savedState = loadState();
 if (savedState) {
   if (!savedState.currency) savedState.currency = "USD";
   if (!Array.isArray(savedState.deliverables)) savedState.deliverables = [];
+  if (!Array.isArray(savedState.scopeFactors)) savedState.scopeFactors = [];
   writeForm(savedState);
   activeCurrency = savedState.currency;
   currency = buildCurrencyFormatter(activeCurrency);

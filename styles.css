@@ -1089,6 +1089,10 @@ select {
   grid-column: 1 / -1;
 }
 
+.factor-fieldset {
+  margin-top: -2px;
+}
+
 .chip {
   position: relative;
   margin: 0;
