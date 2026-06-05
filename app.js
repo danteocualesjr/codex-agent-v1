@@ -591,6 +591,8 @@ function updateOutput(input) {
   animateCurrency(document.querySelector("#floorPrice"), prices.floor, currency);
   animateCurrency(document.querySelector("#recommendedPrice"), prices.recommended, currency, 640);
   animateCurrency(document.querySelector("#stretchPrice"), prices.stretch, currency);
+  animateCurrency(document.querySelector("#dockPrice"), prices.recommended, currency, 640);
+  animateNumber(document.querySelector("#dockRisk"), prices.riskScore, (v) => `${v}/10`, 720);
   animateNumber(
     document.querySelector("#riskScore"),
     prices.riskScore,
