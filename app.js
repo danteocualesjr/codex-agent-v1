@@ -322,6 +322,32 @@ function buildUpsells(input) {
   return upsells;
 }
 
+function buildRedFlags(input) {
+  const noteText = input.notes.toLowerCase();
+  const flags = [];
+  const keywordFlags = [
+    ["asap", "ASAP language usually means calendar risk; price rush windows explicitly."],
+    ["cheap", "Cheap/bargain framing is a margin warning; anchor on outcomes before price."],
+    ["urgent", "Urgent delivery needs fast approvals and a higher upfront payment."],
+    ["unlimited", "Unlimited scope language should be replaced with capped rounds and change orders."],
+    ["quick", "Quick-turn requests need clear assumptions and dependency dates."],
+  ];
+
+  for (const [keyword, message] of keywordFlags) {
+    if (noteText.includes(keyword)) flags.push(message);
+  }
+
+  if (input.scopeFactors.includes("integration")) {
+    flags.push("Integration work can hide unknown API and QA effort; add a technical discovery gate.");
+  }
+
+  if (input.scopeFactors.includes("discovery")) {
+    flags.push("Discovery is not complete; keep the quote range visible until requirements settle.");
+  }
+
+  return flags.length ? flags : ["No obvious red flags detected in the current inputs."];
+}
+
 function buildMarkdownProposal(input, prices, riskScore) {
   const deliverableList = input.deliverables.length
     ? input.deliverables.map((item) => `- ${titleize(item)}`).join("\n")
@@ -551,6 +577,7 @@ function updateOutput(input) {
 
   renderList("#guardrails", buildGuardrails(input, prices.riskScore));
   renderList("#upsells", buildUpsells(input));
+  renderList("#redFlags", buildRedFlags(input));
 
   proposalText.textContent = buildProposal(input, prices, prices.riskScore);
   updatePricingRecommendation(input, prices);
