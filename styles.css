@@ -936,6 +936,10 @@ body::before {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.grid.four-up {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 /* ---------- form ---------- */
 label {
   display: grid;
@@ -2314,6 +2318,7 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   .pricing-grid,
   .hero-points,
   .grid.three-up,
+  .grid.four-up,
   .checkout-form,
   .pricing-header {
     grid-template-columns: 1fr;

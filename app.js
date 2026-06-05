@@ -313,6 +313,7 @@ function buildMarkdownProposal(input, prices, riskScore) {
     `**Engagement type:** ${titleize(input.projectType)}  `,
     `**Recommended investment:** ${currency.format(prices.recommended)}  `,
     `**Floor / Stretch:** ${currency.format(prices.floor)} / ${currency.format(prices.stretch)}  `,
+    input.clientBudget > 0 ? `**Client budget:** ${currency.format(input.clientBudget)}  ` : "",
     `**Payment schedule:** ${prices.paymentPlan}  `,
     "",
     "## Scope",
@@ -355,6 +356,9 @@ function buildProposal(input, prices, riskScore) {
   }
   headerLines.push(`Engagement type: ${titleize(input.projectType)}`);
   headerLines.push(`Recommended investment: ${currency.format(prices.recommended)}`);
+  if (input.clientBudget > 0) {
+    headerLines.push(`Client budget: ${currency.format(input.clientBudget)}`);
+  }
   headerLines.push(`Payment schedule: ${prices.paymentPlan}`);
 
   return `${headerLines.join("\n")}
@@ -482,6 +486,7 @@ function readForm() {
     budgetConfidence: document.querySelector("#budgetConfidence").value,
     hours: Number(document.querySelector("#hours").value || 0),
     rate: Number(document.querySelector("#rate").value || 0),
+    clientBudget: Number(document.querySelector("#clientBudget")?.value || 0),
     currency: document.querySelector("#currency")?.value || "USD",
     timeline: document.querySelector("#timeline").value,
     revisions: document.querySelector("#revisions").value,
@@ -500,6 +505,8 @@ function writeForm(input) {
   document.querySelector("#budgetConfidence").value = input.budgetConfidence;
   document.querySelector("#hours").value = input.hours;
   document.querySelector("#rate").value = input.rate;
+  const clientBudgetField = document.querySelector("#clientBudget");
+  if (clientBudgetField) clientBudgetField.value = input.clientBudget || 0;
   const currencySelect = document.querySelector("#currency");
   if (currencySelect && input.currency) {
     currencySelect.value = input.currency;
@@ -706,6 +713,7 @@ const defaultFormState = {
   budgetConfidence: "low",
   hours: 40,
   rate: 90,
+  clientBudget: 0,
   currency: "USD",
   timeline: "normal",
   revisions: "2",
