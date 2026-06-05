@@ -118,6 +118,12 @@ const stakeholderMultipliers = {
   large: 1.18,
 };
 
+const marginGoalMultipliers = {
+  growth: 0.94,
+  standard: 1,
+  premium: 1.14,
+};
+
 const budgetRiskAdjustments = {
   low: 2.3,
   medium: 1.1,
@@ -318,6 +324,7 @@ function buildMarkdownProposal(input, prices, riskScore) {
     "",
     "## Scope",
     `- Estimated effort: ${input.hours} hours at ${currency.format(input.rate)}/hr`,
+    `- Margin goal: ${titleize(input.marginGoal)}`,
     `- Revision rounds included: ${input.revisions}`,
     `- Stakeholder profile: ${input.stakeholders}`,
     "",
@@ -365,6 +372,7 @@ function buildProposal(input, prices, riskScore) {
 
 Scope
 - Estimated effort: ${input.hours} hours at a target internal rate of ${currency.format(input.rate)}/hr
+- Margin goal: ${titleize(input.marginGoal)}
 - Included deliverables: ${deliverableList}
 - Revision rounds included: ${input.revisions}
 - Stakeholder profile: ${input.stakeholders}
@@ -404,7 +412,8 @@ function computeQuote(input) {
     deliverableBoost *
     timelineMultipliers[input.timeline] *
     revisionMultipliers[input.revisions] *
-    stakeholderMultipliers[input.stakeholders];
+    stakeholderMultipliers[input.stakeholders] *
+    (marginGoalMultipliers[input.marginGoal] || marginGoalMultipliers.standard);
 
   const recommended = Math.round(base * multiplier);
   const floor = Math.round(recommended * 0.82);
@@ -484,6 +493,7 @@ function readForm() {
     projectName: document.querySelector("#projectName")?.value.trim() || "",
     projectType: document.querySelector("#projectType").value,
     budgetConfidence: document.querySelector("#budgetConfidence").value,
+    marginGoal: document.querySelector("#marginGoal")?.value || "standard",
     hours: Number(document.querySelector("#hours").value || 0),
     rate: Number(document.querySelector("#rate").value || 0),
     clientBudget: Number(document.querySelector("#clientBudget")?.value || 0),
@@ -503,6 +513,8 @@ function writeForm(input) {
   if (projectNameField) projectNameField.value = input.projectName || "";
   document.querySelector("#projectType").value = input.projectType;
   document.querySelector("#budgetConfidence").value = input.budgetConfidence;
+  const marginGoalSelect = document.querySelector("#marginGoal");
+  if (marginGoalSelect) marginGoalSelect.value = input.marginGoal || "standard";
   document.querySelector("#hours").value = input.hours;
   document.querySelector("#rate").value = input.rate;
   const clientBudgetField = document.querySelector("#clientBudget");
@@ -711,6 +723,7 @@ const defaultFormState = {
   projectName: "",
   projectType: "brand",
   budgetConfidence: "low",
+  marginGoal: "standard",
   hours: 40,
   rate: 90,
   clientBudget: 0,
