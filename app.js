@@ -142,6 +142,13 @@ const budgetRiskAdjustments = {
   high: 0.4,
 };
 
+const toneIntros = {
+  balanced: "This recommendation balances delivery confidence, scope protection, and close potential.",
+  warm: "This proposal keeps the collaboration clear, practical, and easy for your team to approve.",
+  firm: "This quote is structured to protect scope, decision speed, and delivery margin.",
+  concise: "Recommended quote, scope, and payment terms are summarized below for fast review.",
+};
+
 const toastStack = document.querySelector("#toastStack");
 const toastIcons = {
   success:
@@ -388,6 +395,8 @@ function buildMarkdownProposal(input, prices, riskScore) {
     input.clientBudget > 0 ? `**Client budget:** ${currency.format(input.clientBudget)}  ` : "",
     `**Payment schedule:** ${prices.paymentPlan}  `,
     "",
+    toneIntros[input.proposalTone] || toneIntros.balanced,
+    "",
     "## Scope",
     `- Estimated effort: ${input.hours} hours at ${currency.format(input.rate)}/hr`,
     `- Margin goal: ${titleize(input.marginGoal)}`,
@@ -438,6 +447,8 @@ function buildProposal(input, prices, riskScore) {
   return `${headerLines.join("\n")}
 
 Scope
+${toneIntros[input.proposalTone] || toneIntros.balanced}
+
 - Estimated effort: ${input.hours} hours at a target internal rate of ${currency.format(input.rate)}/hr
 - Margin goal: ${titleize(input.marginGoal)}
 - Included deliverables: ${deliverableList}
@@ -650,6 +661,7 @@ function readForm() {
     stakeholders: document.querySelector("#stakeholders").value,
     deliverables: getSelectedDeliverables(),
     scopeFactors: getSelectedScopeFactors(),
+    proposalTone: document.querySelector("#proposalTone")?.value || "balanced",
     notes: document.querySelector("#notes").value,
   };
 }
@@ -674,6 +686,8 @@ function writeForm(input) {
   document.querySelector("#timeline").value = input.timeline;
   document.querySelector("#revisions").value = input.revisions;
   document.querySelector("#stakeholders").value = input.stakeholders;
+  const proposalToneSelect = document.querySelector("#proposalTone");
+  if (proposalToneSelect) proposalToneSelect.value = input.proposalTone || "balanced";
   document.querySelector("#notes").value = input.notes;
 
   for (const checkbox of document.querySelectorAll('input[type="checkbox"]')) {
@@ -883,6 +897,7 @@ const defaultFormState = {
   stakeholders: "small",
   deliverables: ["strategy", "design", "handoff"],
   scopeFactors: [],
+  proposalTone: "balanced",
   notes: "",
 };
 
