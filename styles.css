@@ -1462,12 +1462,30 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   margin: 0 0 10px;
 }
 
+.confidence-meter {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(60, 38, 18, 0.08);
+  overflow: hidden;
+  margin: 0 0 10px;
+}
+
 #riskMeterFill {
   display: block;
   height: 100%;
   width: 0;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--brand) 0%, var(--warn) 60%, var(--danger) 100%);
+  transition: width 600ms var(--ease);
+}
+
+#confidenceMeterFill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--highlight) 0%, var(--brand) 100%);
   transition: width 600ms var(--ease);
 }
 

@@ -239,6 +239,7 @@ const checkoutMessage = document.querySelector("#checkoutMessage");
 const checkoutButton = document.querySelector("#checkoutButton");
 const copyCheckoutLinkButton = document.querySelector("#copyCheckoutLink");
 const riskMeterFill = document.querySelector("#riskMeterFill");
+const confidenceMeterFill = document.querySelector("#confidenceMeterFill");
 const footerYear = document.querySelector("#footerYear");
 
 const pricingCatalog = {
@@ -463,6 +464,12 @@ function computeQuote(input) {
 
   riskScore = Math.min(10, Math.max(1, Number(riskScore.toFixed(1))));
 
+  const budgetConfidenceBonus = input.budgetConfidence === "high" ? 14 : input.budgetConfidence === "medium" ? 7 : 0;
+  const confidence = Math.max(
+    38,
+    Math.min(96, Math.round(92 - riskScore * 4 + budgetConfidenceBonus - input.scopeFactors.length * 4))
+  );
+
   const paymentPlan =
     riskScore >= 7
       ? "60% upfront / 30% midpoint / 10% final"
@@ -475,6 +482,7 @@ function computeQuote(input) {
     recommended,
     stretch,
     riskScore,
+    confidence,
     paymentPlan,
   };
 }
@@ -500,6 +508,16 @@ function updateOutput(input) {
     riskMeterFill.dataset.level =
       prices.riskScore >= 7 ? "high" : prices.riskScore >= 4 ? "medium" : "low";
   }
+  animateNumber(document.querySelector("#confidenceScore"), prices.confidence, (v) => `${v}%`, 720);
+  if (confidenceMeterFill) {
+    confidenceMeterFill.style.width = `${prices.confidence}%`;
+  }
+  document.querySelector("#confidenceSummary").textContent =
+    prices.confidence >= 80
+      ? "Strong signal quality. This quote is ready to share."
+      : prices.confidence >= 60
+        ? "Good starting point. Confirm assumptions before sending."
+        : "Needs more discovery before the number is client-safe.";
   document.querySelector("#riskSummary").textContent =
     prices.riskScore >= 7
       ? "High-friction deal. Protect margin and tighten scope."
