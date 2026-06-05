@@ -2201,7 +2201,8 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
 
 .history-empty.is-hidden,
 .history-list.is-hidden,
-#clearHistory.is-hidden {
+#clearHistory.is-hidden,
+#exportHistory.is-hidden {
   display: none;
 }
 

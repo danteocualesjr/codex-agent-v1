@@ -1214,6 +1214,7 @@ const historyEmptyEl = document.querySelector("#historyEmpty");
 const historyCountEl = document.querySelector("#historyCount");
 const saveQuoteButton = document.querySelector("#saveQuote");
 const clearHistoryButton = document.querySelector("#clearHistory");
+const exportHistoryButton = document.querySelector("#exportHistory");
 
 function loadHistory() {
   try {
@@ -1274,12 +1275,14 @@ function renderHistory() {
     historyListEl.classList.add("is-hidden");
     historyEmptyEl?.classList.remove("is-hidden");
     clearHistoryButton?.classList.add("is-hidden");
+    exportHistoryButton?.classList.add("is-hidden");
     return;
   }
 
   historyListEl.classList.remove("is-hidden");
   historyEmptyEl?.classList.add("is-hidden");
   clearHistoryButton?.classList.remove("is-hidden");
+  exportHistoryButton?.classList.remove("is-hidden");
 
   for (const entry of entries) {
     const summary = summarizeEntry(entry);
@@ -1385,6 +1388,44 @@ if (clearHistoryButton) {
       type: "info",
       title: "History cleared",
       message: "All saved quotes were removed from this browser.",
+    });
+  });
+}
+
+function csvEscape(value) {
+  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+}
+
+if (exportHistoryButton) {
+  exportHistoryButton.addEventListener("click", () => {
+    const entries = loadHistory();
+    if (!entries.length) return;
+    const rows = [
+      ["Saved at", "Client", "Project", "Type", "Recommended", "Risk", "Currency"],
+      ...entries.map((entry) => [
+        entry.savedAt,
+        entry.input.clientName || "",
+        entry.input.projectName || "",
+        projectTypeLabels[entry.input.projectType] || entry.input.projectType,
+        entry.prices.recommended,
+        entry.prices.riskScore,
+        entry.input.currency || "USD",
+      ]),
+    ];
+    const csv = rows.map((row) => row.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "scopemint-quote-history.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast({
+      type: "success",
+      title: "History exported",
+      message: "CSV download created from saved quotes.",
     });
   });
 }
