@@ -663,6 +663,44 @@ body::before {
   color: var(--brand-dark);
 }
 
+/* ---------- proof strip ---------- */
+.proof-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: -8px 0 28px;
+}
+
+.proof-strip article {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 252, 247, 0.78);
+  box-shadow: var(--shadow-sm);
+}
+
+.proof-value,
+.proof-label {
+  display: block;
+}
+
+.proof-value {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.proof-label {
+  margin-top: 4px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 /* ---------- hero live-preview card ---------- */
 .hero-preview {
   gap: 14px;
