@@ -450,6 +450,7 @@ function computeQuote(input) {
   const recommended = Math.round(base * multiplier);
   const floor = Math.round(recommended * 0.82);
   const stretch = Math.round(recommended * 1.22);
+  const budgetGap = input.clientBudget > 0 ? input.clientBudget - recommended : null;
 
   let riskScore =
     budgetRiskAdjustments[input.budgetConfidence] +
@@ -483,6 +484,7 @@ function computeQuote(input) {
     stretch,
     riskScore,
     confidence,
+    budgetGap,
     paymentPlan,
   };
 }
@@ -529,6 +531,23 @@ function updateOutput(input) {
     prices.paymentPlan === "Monthly prepay"
       ? "Best for ongoing retainers with continuous scope."
       : "Front-load cash flow so the project starts safely.";
+  const budgetFitStatus = document.querySelector("#budgetFitStatus");
+  const budgetFitSummary = document.querySelector("#budgetFitSummary");
+  if (budgetFitStatus && budgetFitSummary) {
+    if (prices.budgetGap === null) {
+      budgetFitStatus.textContent = "No budget";
+      budgetFitSummary.textContent = "Add a client budget to see fit guidance.";
+    } else if (prices.budgetGap >= 0) {
+      budgetFitStatus.textContent = "Inside";
+      budgetFitSummary.textContent = `${currency.format(prices.budgetGap)} below the stated budget.`;
+    } else if (Math.abs(prices.budgetGap) <= prices.recommended * 0.15) {
+      budgetFitStatus.textContent = "Close";
+      budgetFitSummary.textContent = `${currency.format(Math.abs(prices.budgetGap))} above budget; explain scope value.`;
+    } else {
+      budgetFitStatus.textContent = "Above";
+      budgetFitSummary.textContent = `${currency.format(Math.abs(prices.budgetGap))} above budget; reduce scope or reset expectations.`;
+    }
+  }
 
   renderList("#guardrails", buildGuardrails(input, prices.riskScore));
   renderList("#upsells", buildUpsells(input));
