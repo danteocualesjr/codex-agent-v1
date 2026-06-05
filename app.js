@@ -952,6 +952,40 @@ const quotePresets = {
   },
 };
 
+const demoQuote = {
+  ...defaultFormState,
+  clientName: "Acme Studio",
+  projectName: "Q3 Brand Refresh",
+  projectType: "brand",
+  budgetConfidence: "medium",
+  clientBudget: 7200,
+  hours: 52,
+  rate: 115,
+  marginGoal: "premium",
+  timeline: "normal",
+  revisions: "2",
+  stakeholders: "small",
+  deliverables: ["strategy", "design", "copy", "handoff"],
+  scopeFactors: ["discovery"],
+  proposalTone: "warm",
+  notes: "Client wants a quick repositioning sprint before launch, with clear handoff for their internal team.",
+};
+
+const loadDemoQuoteButton = document.querySelector("#loadDemoQuote");
+if (loadDemoQuoteButton) {
+  loadDemoQuoteButton.addEventListener("click", () => {
+    writeForm(demoQuote);
+    persistState(demoQuote);
+    updateOutput(readForm());
+    document.querySelector("#quote")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    showToast({
+      type: "success",
+      title: "Demo quote loaded",
+      message: "A sample client brief is ready to explore.",
+    });
+  });
+}
+
 for (const button of document.querySelectorAll("[data-preset]")) {
   button.addEventListener("click", () => {
     const preset = quotePresets[button.dataset.preset];
