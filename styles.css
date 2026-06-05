@@ -2091,6 +2091,13 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   box-shadow: var(--shadow-sm);
 }
 
+.history-item.is-pinned {
+  border-color: rgba(255, 138, 54, 0.45);
+  background:
+    radial-gradient(420px 160px at 0% 0%, rgba(255, 138, 54, 0.10), transparent 60%),
+    var(--panel-soft);
+}
+
 .history-item .history-info {
   display: grid;
   gap: 4px;
@@ -2137,6 +2144,11 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   font-size: 0.66rem;
   letter-spacing: 0.08em;
   font-weight: 800;
+}
+
+.history-item .history-tag.is-pinned {
+  background: var(--highlight-soft);
+  color: var(--highlight);
 }
 
 .history-item .history-risk {

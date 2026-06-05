@@ -1228,7 +1228,11 @@ function loadHistory() {
 }
 
 function saveHistory(entries) {
-  localStorage.setItem(historyStorageKey, JSON.stringify(entries.slice(0, 25)));
+  const sorted = [...entries].sort((a, b) => {
+    if (Boolean(a.pinned) !== Boolean(b.pinned)) return a.pinned ? -1 : 1;
+    return new Date(b.savedAt) - new Date(a.savedAt);
+  });
+  localStorage.setItem(historyStorageKey, JSON.stringify(sorted.slice(0, 25)));
 }
 
 function escapeHtml(str) {
@@ -1319,12 +1323,14 @@ function renderHistory() {
     const summary = summarizeEntry(entry);
     const li = document.createElement("li");
     li.className = "history-item";
+    li.classList.toggle("is-pinned", Boolean(entry.pinned));
     li.dataset.id = entry.id;
     li.innerHTML = `
       <div class="history-info">
         <p class="history-title">${escapeHtml(summary.title)}</p>
         <div class="history-meta-row">
           <span class="history-tag">${escapeHtml(summary.typeTag)}</span>
+          ${entry.pinned ? '<span class="history-tag is-pinned">Pinned</span>' : ""}
           <span class="history-price">${escapeHtml(summary.price)}</span>
           <span class="history-risk">
             <span class="history-risk-dot" data-level="${escapeHtml(summary.riskLevel)}"></span>
@@ -1334,6 +1340,9 @@ function renderHistory() {
         </div>
       </div>
       <div class="history-actions">
+        <button class="icon-button" data-action="pin" type="button" title="Pin quote" aria-label="Pin quote">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M14 4l6 6-3 1-4 4 1 5-2 2-4-6-6-4 2-2 5 1 4-4 1-3z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
         <button class="icon-button" data-action="restore" type="button" title="Restore quote" aria-label="Restore quote">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -1386,7 +1395,16 @@ if (historyListEl) {
     const id = item.dataset.id;
     if (button.dataset.action === "restore") restoreHistoryEntry(id);
     if (button.dataset.action === "delete") deleteHistoryEntry(id);
+    if (button.dataset.action === "pin") toggleHistoryPin(id);
   });
+}
+
+function toggleHistoryPin(id) {
+  const entries = loadHistory().map((item) =>
+    item.id === id ? { ...item, pinned: !item.pinned } : item
+  );
+  saveHistory(entries);
+  renderHistory();
 }
 
 if (saveQuoteButton) {
@@ -1396,6 +1414,7 @@ if (saveQuoteButton) {
     const entry = {
       id: `q_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
       savedAt: new Date().toISOString(),
+      pinned: false,
       input,
       prices,
     };
