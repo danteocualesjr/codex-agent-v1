@@ -2043,6 +2043,13 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+}
+
+.history-search {
+  width: min(240px, 100%);
+  padding: 10px 12px;
+  border-radius: 999px;
 }
 
 .history-count {

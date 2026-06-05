@@ -1215,6 +1215,7 @@ const historyCountEl = document.querySelector("#historyCount");
 const saveQuoteButton = document.querySelector("#saveQuote");
 const clearHistoryButton = document.querySelector("#clearHistory");
 const exportHistoryButton = document.querySelector("#exportHistory");
+const historySearchInput = document.querySelector("#historySearch");
 
 function loadHistory() {
   try {
@@ -1265,17 +1266,47 @@ function summarizeEntry(entry) {
 function renderHistory() {
   if (!historyListEl) return;
   const entries = loadHistory();
+  const query = historySearchInput?.value.trim().toLowerCase() || "";
+  const visibleEntries = query
+    ? entries.filter((entry) => {
+        const haystack = [
+          entry.input.clientName,
+          entry.input.projectName,
+          projectTypeLabels[entry.input.projectType],
+          entry.input.notes,
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(query);
+      })
+    : entries;
   historyListEl.innerHTML = "";
 
   if (historyCountEl) {
-    historyCountEl.textContent = `${entries.length} saved`;
+    historyCountEl.textContent = query
+      ? `${visibleEntries.length}/${entries.length} shown`
+      : `${entries.length} saved`;
   }
 
   if (entries.length === 0) {
     historyListEl.classList.add("is-hidden");
     historyEmptyEl?.classList.remove("is-hidden");
+    if (historyEmptyEl) {
+      historyEmptyEl.textContent = "Save quotes from the proposal panel above to build a personal pipeline log.";
+    }
     clearHistoryButton?.classList.add("is-hidden");
     exportHistoryButton?.classList.add("is-hidden");
+    return;
+  }
+
+  if (visibleEntries.length === 0) {
+    historyListEl.classList.add("is-hidden");
+    historyEmptyEl?.classList.remove("is-hidden");
+    if (historyEmptyEl) {
+      historyEmptyEl.textContent = "No saved quotes match that search.";
+    }
+    clearHistoryButton?.classList.remove("is-hidden");
+    exportHistoryButton?.classList.remove("is-hidden");
     return;
   }
 
@@ -1284,7 +1315,7 @@ function renderHistory() {
   clearHistoryButton?.classList.remove("is-hidden");
   exportHistoryButton?.classList.remove("is-hidden");
 
-  for (const entry of entries) {
+  for (const entry of visibleEntries) {
     const summary = summarizeEntry(entry);
     const li = document.createElement("li");
     li.className = "history-item";
@@ -1390,6 +1421,10 @@ if (clearHistoryButton) {
       message: "All saved quotes were removed from this browser.",
     });
   });
+}
+
+if (historySearchInput) {
+  historySearchInput.addEventListener("input", renderHistory);
 }
 
 function csvEscape(value) {
