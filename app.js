@@ -901,6 +901,73 @@ const defaultFormState = {
   notes: "",
 };
 
+const quotePresets = {
+  "brand-sprint": {
+    projectType: "brand",
+    hours: 45,
+    rate: 110,
+    marginGoal: "premium",
+    timeline: "normal",
+    revisions: "2",
+    stakeholders: "small",
+    deliverables: ["strategy", "design", "handoff"],
+    scopeFactors: ["discovery"],
+    notes: "Brand sprint with positioning, identity system, and launch handoff.",
+  },
+  "web-launch": {
+    projectType: "web",
+    hours: 80,
+    rate: 125,
+    marginGoal: "standard",
+    timeline: "normal",
+    revisions: "3",
+    stakeholders: "small",
+    deliverables: ["strategy", "design", "copy", "dev", "analytics"],
+    scopeFactors: ["integration"],
+    notes: "Marketing website launch with copy, build, analytics, and QA.",
+  },
+  "mvp-build": {
+    projectType: "app",
+    hours: 160,
+    rate: 140,
+    marginGoal: "premium",
+    timeline: "rush",
+    revisions: "3",
+    stakeholders: "large",
+    deliverables: ["strategy", "design", "dev", "handoff"],
+    scopeFactors: ["discovery", "integration"],
+    notes: "MVP build with technical discovery, product design, and integrations.",
+  },
+  retainer: {
+    projectType: "retainer",
+    hours: 35,
+    rate: 120,
+    marginGoal: "standard",
+    timeline: "calm",
+    revisions: "2",
+    stakeholders: "solo",
+    deliverables: ["strategy", "design", "analytics"],
+    scopeFactors: [],
+    notes: "Monthly optimization retainer with reporting and delivery cadence.",
+  },
+};
+
+for (const button of document.querySelectorAll("[data-preset]")) {
+  button.addEventListener("click", () => {
+    const preset = quotePresets[button.dataset.preset];
+    if (!preset) return;
+    const merged = { ...readForm(), ...preset };
+    writeForm(merged);
+    persistState(merged);
+    updateOutput(readForm());
+    showToast({
+      type: "success",
+      title: "Preset loaded",
+      message: `${button.textContent} details applied to the calculator.`,
+    });
+  });
+}
+
 scopeForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const input = readForm();

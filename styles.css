@@ -941,6 +941,32 @@ body::before {
 }
 
 /* ---------- form ---------- */
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -8px 0 18px;
+}
+
+.preset-chip {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  padding: 8px 12px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 160ms var(--ease), border-color 160ms var(--ease),
+    background 160ms var(--ease);
+}
+
+.preset-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(13, 110, 102, 0.42);
+  background: rgba(13, 110, 102, 0.16);
+}
+
 label {
   display: grid;
   gap: 6px;
