@@ -231,6 +231,20 @@ if (themeToggle) {
   });
 }
 
+function showShortcutHelp() {
+  showToast({
+    type: "info",
+    title: "Keyboard shortcuts",
+    message: "Cmd/Ctrl+Enter generates a quote. ? opens this help. Esc closes the mobile nav.",
+    duration: 5200,
+  });
+}
+
+const shortcutsHelpButton = document.querySelector("#shortcutsHelp");
+if (shortcutsHelpButton) {
+  shortcutsHelpButton.addEventListener("click", showShortcutHelp);
+}
+
 const scopeForm = document.querySelector("#scope-form");
 const proposalText = document.querySelector("#proposalText");
 const copyProposalButton = document.querySelector("#copyProposal");
@@ -1044,6 +1058,12 @@ scopeForm.addEventListener("change", () => {
 
 document.addEventListener("keydown", (event) => {
   const isSubmitCombo = (event.metaKey || event.ctrlKey) && event.key === "Enter";
+  const isTyping = ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName || "");
+  if (event.key === "?" && !isTyping) {
+    event.preventDefault();
+    showShortcutHelp();
+    return;
+  }
   if (isSubmitCombo) {
     event.preventDefault();
     const submitButton = scopeForm.querySelector(".submit-button");
