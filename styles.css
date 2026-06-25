@@ -1011,6 +1011,15 @@ legend {
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--ink);
+  transition: color 160ms var(--ease);
+}
+
+label:focus-within > span {
+  color: var(--brand-dark);
+}
+
+[data-theme="dark"] label:focus-within > span {
+  color: var(--brand);
 }
 
 input,
