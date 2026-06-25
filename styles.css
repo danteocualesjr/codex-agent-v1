@@ -2166,6 +2166,24 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   align-items: center;
   transition: transform 200ms var(--ease), border-color 200ms var(--ease),
     box-shadow 200ms var(--ease);
+  animation: history-rise 420ms var(--ease) both;
+}
+
+@keyframes history-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .history-item {
+    animation: none;
+  }
 }
 
 .history-item:hover {

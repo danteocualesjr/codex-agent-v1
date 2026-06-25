@@ -1370,10 +1370,11 @@ function renderHistory() {
   clearHistoryButton?.classList.remove("is-hidden");
   exportHistoryButton?.classList.remove("is-hidden");
 
-  for (const entry of visibleEntries) {
+  for (const [index, entry] of visibleEntries.entries()) {
     const summary = summarizeEntry(entry);
     const li = document.createElement("li");
     li.className = "history-item";
+    li.style.animationDelay = `${index * 60}ms`;
     li.classList.toggle("is-pinned", Boolean(entry.pinned));
     li.dataset.id = entry.id;
     li.innerHTML = `
