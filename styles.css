@@ -1530,6 +1530,18 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   border-radius: var(--radius-lg);
   background: rgba(255, 252, 247, 0.85);
   padding: 20px;
+  transition: transform 200ms var(--ease), box-shadow 200ms var(--ease), border-color 200ms var(--ease);
+}
+
+.metrics article:hover,
+.callouts article:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  border-color: rgba(13, 110, 102, 0.28);
+}
+
+.metrics article {
+  border-left: 3px solid var(--brand);
 }
 
 .metrics strong {
