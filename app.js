@@ -1039,7 +1039,17 @@ scopeForm.addEventListener("submit", (event) => {
   const input = readForm();
   persistState(input);
   updateOutput(input);
+  flashOutputPanel();
 });
+
+function flashOutputPanel() {
+  const panel = document.querySelector("#output-panel");
+  if (!panel) return;
+  panel.classList.remove("is-updated");
+  void panel.offsetWidth;
+  panel.classList.add("is-updated");
+  window.setTimeout(() => panel.classList.remove("is-updated"), 700);
+}
 
 let autosaveTimer = 0;
 scopeForm.addEventListener("input", () => {

@@ -916,6 +916,22 @@ body::before {
   padding: 28px;
 }
 
+.output-panel.is-updated {
+  animation: output-flash 680ms var(--ease);
+}
+
+@keyframes output-flash {
+  0%   { box-shadow: var(--shadow-md); }
+  35%  { box-shadow: 0 0 0 3px rgba(13, 110, 102, 0.22), var(--shadow-lg); }
+  100% { box-shadow: var(--shadow-md); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .output-panel.is-updated {
+    animation: none;
+  }
+}
+
 .section-heading {
   margin-bottom: 22px;
 }
