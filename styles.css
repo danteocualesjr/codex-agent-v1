@@ -1702,6 +1702,13 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   border-radius: var(--radius-md);
   max-height: 360px;
   overflow: auto;
+  transition: background 240ms var(--ease), border-color 240ms var(--ease), box-shadow 240ms var(--ease);
+}
+
+.proposal-box pre.is-copied {
+  background: rgba(13, 110, 102, 0.08);
+  border-color: rgba(13, 110, 102, 0.35);
+  box-shadow: 0 0 0 3px rgba(13, 110, 102, 0.12);
 }
 
 /* ---------- monetization & pricing cards ---------- */

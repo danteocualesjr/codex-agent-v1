@@ -1128,6 +1128,8 @@ copyProposalButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(proposalText.textContent);
     setLabel("Copied");
+    proposalText.classList.add("is-copied");
+    window.setTimeout(() => proposalText.classList.remove("is-copied"), 900);
     showToast({
       type: "success",
       title: "Proposal copied",
