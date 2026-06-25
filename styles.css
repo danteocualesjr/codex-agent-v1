@@ -2329,10 +2329,37 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
 }
 
 .history-empty {
-  margin: 8px 0 0;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  margin: 24px 0 0;
+  padding: 32px 24px;
+  text-align: center;
   color: var(--muted);
   font-size: 0.95rem;
   line-height: 1.55;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 252, 247, 0.5);
+}
+
+.history-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+.history-empty-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+[data-theme="dark"] .history-empty {
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .history-empty.is-hidden,

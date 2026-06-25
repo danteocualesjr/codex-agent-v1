@@ -1272,6 +1272,7 @@ if (shareQuoteButton) {
 const historyStorageKey = "scopemint-history";
 const historyListEl = document.querySelector("#historyList");
 const historyEmptyEl = document.querySelector("#historyEmpty");
+const historyEmptyTextEl = document.querySelector("#historyEmptyText");
 const historyCountEl = document.querySelector("#historyCount");
 const saveQuoteButton = document.querySelector("#saveQuote");
 const clearHistoryButton = document.querySelector("#clearHistory");
@@ -1356,8 +1357,8 @@ function renderHistory() {
   if (entries.length === 0) {
     historyListEl.classList.add("is-hidden");
     historyEmptyEl?.classList.remove("is-hidden");
-    if (historyEmptyEl) {
-      historyEmptyEl.textContent = "Save quotes from the proposal panel above to build a personal pipeline log.";
+    if (historyEmptyTextEl) {
+      historyEmptyTextEl.textContent = "Save quotes from the proposal panel above to build a personal pipeline log.";
     }
     clearHistoryButton?.classList.add("is-hidden");
     exportHistoryButton?.classList.add("is-hidden");
@@ -1367,8 +1368,8 @@ function renderHistory() {
   if (visibleEntries.length === 0) {
     historyListEl.classList.add("is-hidden");
     historyEmptyEl?.classList.remove("is-hidden");
-    if (historyEmptyEl) {
-      historyEmptyEl.textContent = "No saved quotes match that search.";
+    if (historyEmptyTextEl) {
+      historyEmptyTextEl.textContent = "No saved quotes match that search.";
     }
     clearHistoryButton?.classList.remove("is-hidden");
     exportHistoryButton?.classList.remove("is-hidden");
