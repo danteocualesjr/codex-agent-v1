@@ -172,6 +172,7 @@ function showToast({ title, message = "", type = "info", duration = 3200 } = {})
     <button type="button" class="toast-close" aria-label="Dismiss">
       <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6l-12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </button>
+    ${duration > 0 ? `<span class="toast-progress" style="animation-duration:${duration}ms"></span>` : ""}
   `;
 
   const dismiss = () => {
