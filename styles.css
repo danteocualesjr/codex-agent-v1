@@ -498,6 +498,26 @@ body::before {
   animation: rise 600ms var(--ease) both;
 }
 
+.panel.is-scroll-reveal {
+  animation: none;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 560ms var(--ease), transform 560ms var(--ease);
+}
+
+.panel.is-scroll-reveal.is-inview {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel.is-scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .panel + .panel,
 .workspace + .panel,
 .workspace > .panel:nth-child(2) {

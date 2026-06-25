@@ -1809,3 +1809,33 @@ if (launchChecklist) {
 
   sections.forEach((section) => observer.observe(section));
 })();
+
+(function setupScrollReveal() {
+  if (typeof IntersectionObserver !== "function") return;
+  const reduceMotion =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const panels = document.querySelectorAll("main .panel:not(.hero)");
+  if (!panels.length) return;
+
+  if (reduceMotion) {
+    panels.forEach((panel) => panel.classList.add("is-inview"));
+    return;
+  }
+
+  panels.forEach((panel) => panel.classList.add("is-scroll-reveal"));
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-inview");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { rootMargin: "0px 0px -8% 0px", threshold: 0.12 }
+  );
+
+  panels.forEach((panel) => observer.observe(panel));
+})();
