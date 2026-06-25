@@ -1524,6 +1524,24 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   box-shadow: 0 12px 30px rgba(13, 110, 102, 0.14);
 }
 
+.price-badge {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+  color: white;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 6px 14px rgba(13, 110, 102, 0.28);
+}
+
 .featured-price strong {
   font-size: clamp(1.9rem, 4.4vw, 2.75rem);
   background: linear-gradient(120deg, var(--brand-dark) 0%, var(--brand) 50%, var(--highlight) 110%);
