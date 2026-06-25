@@ -2111,6 +2111,29 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   border-top: 1px solid var(--line);
 }
 
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  align-items: center;
+}
+
+.footer-nav a {
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: color 160ms var(--ease);
+}
+
+.footer-nav a:hover {
+  color: var(--brand-dark);
+}
+
+[data-theme="dark"] .footer-nav a:hover {
+  color: var(--brand);
+}
+
 .footer-brand {
   display: flex;
   align-items: center;
