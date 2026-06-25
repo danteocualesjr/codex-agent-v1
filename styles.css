@@ -2045,11 +2045,52 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   min-height: 24px;
   margin: 14px 0 0;
   font-size: 0.95rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.checkout-msg-icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  border-radius: 7px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+}
+
+.checkout-msg-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.checkout-msg-text {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .checkout-message.is-success {
   color: var(--success);
   font-weight: 600;
+}
+
+.checkout-message.is-success .checkout-msg-icon {
+  background: rgba(21, 122, 58, 0.14);
+  color: var(--success);
+}
+
+.checkout-message.is-error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.checkout-message.is-error .checkout-msg-icon {
+  background: rgba(181, 58, 20, 0.12);
+  color: var(--danger);
 }
 
 /* ---------- launch note ---------- */

@@ -873,21 +873,40 @@ function buildCheckoutLink() {
   return `https://buy.scopemint.app/checkout?plan=${plan}&billing=${billing}&email=${email}&team=${seats}`;
 }
 
+const checkoutMessageIcons = {
+  success:
+    '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  error:
+    '<svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5M12 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>',
+  info:
+    '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 7.5h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+};
+
+function setCheckoutMessage(text, type = "info") {
+  if (!checkoutMessage) return;
+  checkoutMessage.classList.remove("is-success", "is-error");
+  if (type === "success") checkoutMessage.classList.add("is-success");
+  if (type === "error") checkoutMessage.classList.add("is-error");
+  const icon = checkoutMessageIcons[type] || checkoutMessageIcons.info;
+  checkoutMessage.innerHTML = `
+    <span class="checkout-msg-icon" aria-hidden="true">${icon}</span>
+    <span class="checkout-msg-text">${escapeHtml(text)}</span>
+  `;
+}
+
 async function copyCheckoutLink() {
   const link = buildCheckoutLink();
 
   try {
     await navigator.clipboard.writeText(link);
-    checkoutMessage.textContent = `Checkout link copied: ${link}`;
-    checkoutMessage.classList.add("is-success");
+    setCheckoutMessage(`Checkout link copied: ${link}`, "success");
     showToast({
       type: "success",
       title: "Checkout link copied",
       message: "Share it with the buyer to start the trial.",
     });
   } catch {
-    checkoutMessage.textContent = "Could not copy the checkout link in this browser.";
-    checkoutMessage.classList.remove("is-success");
+    setCheckoutMessage("Could not copy the checkout link in this browser.", "error");
     showToast({
       type: "error",
       title: "Copy failed",
@@ -901,16 +920,16 @@ function handleCheckout() {
   const email = checkoutEmail.value.trim();
 
   if (!email) {
-    checkoutMessage.textContent = "Add a work email so the trial can be created.";
-    checkoutMessage.classList.remove("is-success");
+    setCheckoutMessage("Add a work email so the trial can be created.", "error");
     checkoutEmail.focus();
     return;
   }
 
   const selectedPlan = pricingCatalog[plan];
-  checkoutMessage.textContent =
-    `Trial ready for ${email}: ${selectedPlan.name} on ${billing} billing at ${formatPlanPrice(selectedPlan[billing], billing)}.`;
-  checkoutMessage.classList.add("is-success");
+  setCheckoutMessage(
+    `Trial ready for ${email}: ${selectedPlan.name} on ${billing} billing at ${formatPlanPrice(selectedPlan[billing], billing)}.`,
+    "success"
+  );
   persistPricingState({ billing, plan, email, teamSize: teamSize.value });
 }
 
