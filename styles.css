@@ -2627,12 +2627,13 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   z-index: 54;
   left: 50%;
   bottom: 22px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(calc(100% + 28px));
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 14px;
+  padding: 10px 10px 10px 16px;
   border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--brand);
   border-radius: 999px;
   background: var(--panel-strong);
   color: var(--muted);
@@ -2641,16 +2642,56 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
   -webkit-backdrop-filter: saturate(140%) blur(14px);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.78rem;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 360ms var(--ease),
+    opacity 280ms var(--ease),
+    visibility 0s linear 360ms;
 }
 
-.quote-dock strong {
+.quote-dock.is-ready {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  transition:
+    transform 360ms var(--ease),
+    opacity 280ms var(--ease),
+    visibility 0s linear 0s;
+}
+
+.quote-dock-item strong {
   color: var(--ink);
 }
 
-.quote-dock a {
+.quote-dock-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--line-strong);
+  flex-shrink: 0;
+}
+
+.quote-dock-cta {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--brand-soft);
   color: var(--brand-dark);
   font-weight: 800;
   text-decoration: none;
+  transition: background 160ms var(--ease), color 160ms var(--ease);
+}
+
+.quote-dock-cta:hover {
+  background: var(--brand);
+  color: #fff;
+}
+
+[data-theme="dark"] .quote-dock-cta {
+  color: var(--brand);
+}
+
+[data-theme="dark"] .quote-dock-cta:hover {
+  color: #fff;
 }
 
 .back-to-top {
@@ -2737,16 +2778,30 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
     right: 12px;
     left: 58px;
     bottom: 16px;
-    transform: none;
+    transform: translateY(calc(100% + 28px));
     justify-content: space-between;
     gap: 8px;
     font-size: 0.68rem;
+    padding: 8px 8px 8px 12px;
+  }
+
+  .quote-dock.is-ready {
+    transform: translateY(0);
+  }
+
+  .quote-dock-divider {
+    display: none;
   }
 }
 
-@media print {
-  .back-to-top {
-    display: none !important;
+@media (prefers-reduced-motion: reduce) {
+  .quote-dock {
+    transition: opacity 120ms linear, visibility 0s linear 120ms;
+    transform: translateX(-50%);
+  }
+  .quote-dock.is-ready {
+    transform: translateX(-50%);
+    transition: opacity 120ms linear, visibility 0s linear 0s;
   }
 }
 
@@ -3118,6 +3173,8 @@ body.is-printing {
   .history-panel,
   .site-footer,
   .toast-stack,
+  .quote-dock,
+  .back-to-top,
   .proposal-actions,
   #riskMeterFill {
     display: none !important;

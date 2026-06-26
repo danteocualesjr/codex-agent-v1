@@ -821,10 +821,11 @@
 
     <div id="toastStack" class="toast-stack" role="status" aria-live="polite"></div>
 
-    <aside class="quote-dock" aria-label="Current quote summary">
-      <span>Recommended <strong id="dockPrice">$0</strong></span>
-      <span>Risk <strong id="dockRisk">0/10</strong></span>
-      <a href="#quote">Edit quote</a>
+    <aside class="quote-dock" id="quoteDock" aria-label="Current quote summary" hidden>
+      <span class="quote-dock-item">Recommended <strong id="dockPrice">$0</strong></span>
+      <span class="quote-dock-divider" aria-hidden="true"></span>
+      <span class="quote-dock-item">Risk <strong id="dockRisk">0/10</strong></span>
+      <a class="quote-dock-cta" href="#quote">Edit quote</a>
     </aside>
 
     <button

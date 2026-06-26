@@ -268,6 +268,7 @@ const footerYear = document.querySelector("#footerYear");
 const launchChecklist = document.querySelector("#launchChecklist");
 const launchProgress = document.querySelector("#launchProgress");
 const launchProgressRing = document.querySelector("#launchProgressRing");
+const quoteDock = document.querySelector("#quoteDock");
 
 const pricingCatalog = {
   starter: {
@@ -671,6 +672,14 @@ function updateOutput(input) {
 
   proposalText.textContent = buildProposal(input, prices, prices.riskScore);
   updatePricingRecommendation(input, prices);
+  updateQuoteDock(prices.recommended);
+}
+
+function updateQuoteDock(recommendedPrice) {
+  if (!quoteDock) return;
+  const hasQuote = Number.isFinite(recommendedPrice) && recommendedPrice > 0;
+  quoteDock.hidden = !hasQuote;
+  quoteDock.classList.toggle("is-ready", hasQuote);
 }
 
 function readForm() {
