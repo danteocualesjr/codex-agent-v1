@@ -1055,11 +1055,18 @@ for (const button of document.querySelectorAll("[data-preset]")) {
     writeForm(merged);
     persistState(merged);
     updateOutput(readForm());
+    setActivePreset(button.dataset.preset);
     showToast({
       type: "success",
       title: "Preset loaded",
       message: `${button.textContent} details applied to the calculator.`,
     });
+  });
+}
+
+function setActivePreset(presetId) {
+  document.querySelectorAll("[data-preset]").forEach((chip) => {
+    chip.classList.toggle("is-active", chip.dataset.preset === presetId);
   });
 }
 
