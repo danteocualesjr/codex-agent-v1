@@ -267,6 +267,7 @@ const autosaveStatus = document.querySelector("#autosaveStatus");
 const footerYear = document.querySelector("#footerYear");
 const launchChecklist = document.querySelector("#launchChecklist");
 const launchProgress = document.querySelector("#launchProgress");
+const launchProgressRing = document.querySelector("#launchProgressRing");
 
 const pricingCatalog = {
   starter: {
@@ -1666,6 +1667,10 @@ function updateLaunchProgress() {
   const checked = boxes.filter((box) => box.checked).length;
   const percent = boxes.length ? Math.round((checked / boxes.length) * 100) : 0;
   launchProgress.textContent = `${percent}%`;
+  if (launchProgressRing) {
+    const circumference = 97.4;
+    launchProgressRing.style.strokeDashoffset = String(circumference * (1 - percent / 100));
+  }
   localStorage.setItem(
     launchStorageKey,
     JSON.stringify(boxes.filter((box) => box.checked).map((box) => box.value))
