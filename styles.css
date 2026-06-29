@@ -703,6 +703,28 @@ body::before {
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: transform 220ms var(--ease), box-shadow 220ms var(--ease), border-color 220ms var(--ease);
+  animation: proof-rise 600ms var(--ease) both;
+}
+
+.proof-strip article:nth-child(1) { animation-delay: 200ms; }
+.proof-strip article:nth-child(2) { animation-delay: 320ms; }
+.proof-strip article:nth-child(3) { animation-delay: 440ms; }
+
+@keyframes proof-rise {
+  from { 
+    opacity: 0; 
+    transform: translateY(16px) scale(0.96);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proof-strip article {
+    animation: none;
+  }
 }
 
 .proof-strip article::before {
@@ -1151,7 +1173,7 @@ textarea {
   background: var(--input-bg);
   padding: 13px 16px;
   outline: none;
-  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease);
+  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease), transform 180ms var(--ease);
 }
 
 textarea {
@@ -1170,8 +1192,9 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 4px rgba(13, 110, 102, 0.14);
+  box-shadow: 0 0 0 4px rgba(13, 110, 102, 0.14), 0 4px 12px rgba(13, 110, 102, 0.08);
   background: var(--input-bg-focus);
+  transform: translateY(-1px);
 }
 
 select {
@@ -1419,6 +1442,22 @@ textarea:focus-visible {
   margin-top: 6px;
   padding: 16px 22px;
   font-size: 1rem;
+  animation: cta-glow 3s ease-in-out infinite;
+}
+
+@keyframes cta-glow {
+  0%, 100% { 
+    box-shadow: 0 8px 18px rgba(13, 110, 102, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  50% { 
+    box-shadow: 0 8px 28px rgba(13, 110, 102, 0.45), 0 0 20px rgba(13, 110, 102, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit-button {
+    animation: none;
+  }
 }
 
 .submit-button.is-flash {
@@ -1947,19 +1986,23 @@ html[data-os="other"] .kbd-modifier:not(.kbd-ctrl) { display: none; }
 .price-card {
   position: relative;
   padding: 24px;
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   border-radius: var(--radius-lg);
   background: rgba(255, 252, 247, 0.92);
   display: flex;
   flex-direction: column;
   gap: 12px;
   transition: transform 220ms var(--ease), border-color 220ms var(--ease),
-    box-shadow 220ms var(--ease);
+    box-shadow 220ms var(--ease), background 220ms var(--ease);
 }
 
 .price-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
+  border-color: transparent;
+  background: 
+    linear-gradient(var(--panel-strong), var(--panel-strong)) padding-box,
+    linear-gradient(135deg, var(--brand), var(--highlight)) border-box;
 }
 
 .price-card .tier {
