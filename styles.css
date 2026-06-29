@@ -1151,7 +1151,7 @@ textarea {
   background: var(--input-bg);
   padding: 13px 16px;
   outline: none;
-  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease);
+  transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease), transform 180ms var(--ease);
 }
 
 textarea {
@@ -1170,8 +1170,9 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 4px rgba(13, 110, 102, 0.14);
+  box-shadow: 0 0 0 4px rgba(13, 110, 102, 0.14), 0 4px 12px rgba(13, 110, 102, 0.08);
   background: var(--input-bg-focus);
+  transform: translateY(-1px);
 }
 
 select {
